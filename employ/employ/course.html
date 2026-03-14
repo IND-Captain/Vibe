@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Learning Courses – EduSmart</title>
+    <meta name="description" content="Browse and enroll in top-rated online courses across technology, business, health, finance, and language learning.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        /* Page-specific overrides */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 20px;
+        }
+        .course-thumbnail { position: relative; height: 160px; overflow: hidden; border-radius: 20px 20px 0 0; }
+        .course-thumbnail img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; }
+        .course-card:hover .course-thumbnail img { transform: scale(1.06); }
+        .bookmark-btn {
+            position: absolute; top: 12px; right: 12px;
+            width: 34px; height: 34px; border-radius: 50%;
+            background: white; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s; z-index: 2;
+        }
+        .bookmark-btn:hover, .bookmark-btn.bookmarked { background: var(--accent); color: white; }
+        .course-header { background: #f8fafc; padding: 16px; border-bottom: 1px solid var(--card-border); }
+        .course-body { padding: 14px 16px; }
+        .course-footer-inner {
+            padding: 14px 16px; border-top: 1px solid var(--card-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .enroll-btn-full {
+            flex: 1; padding: 10px 14px;
+            background: var(--accent-glow); border: 1px solid transparent;
+            border-radius: 12px; color: var(--accent); font-weight: 700;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+            justify-content: center; gap: 8px; margin-left: 10px; font-size: 13px;
+            font-family: inherit;
+        }
+        .enroll-btn-full:hover { background: var(--accent); color: white; transform: translateY(-2px); }
+        .topic-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+        .topic-tag { font-size: 10px; padding: 3px 8px; background: #f1f5f9; border: 1px solid var(--card-border); border-radius: 8px; color: #64748b; font-weight: 600; }
+
+        /* Modal */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+        .modal-overlay.active { display:flex; }
+        .modal-card { background:#fff; width:100%; max-width:900px; max-height:90vh; border-radius:28px; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--card-border); box-shadow:0 30px 80px rgba(0,0,0,0.15); }
+        .modal-hero { position:relative; height:240px; flex-shrink:0; }
+        .modal-hero img { width:100%; height:100%; object-fit:cover; }
+        .modal-hero-fade { position:absolute; inset:0; background:linear-gradient(to top,#fff 0%,transparent 70%); }
+        .modal-close-btn { position:absolute; top:16px; right:16px; width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.92); border:none; cursor:pointer; font-size:16px; color:#1e293b; display:flex; align-items:center; justify-content:center; z-index:10; transition:0.25s; }
+        .modal-close-btn:hover { background:#ef4444; color:white; }
+        .modal-body { padding:28px; overflow-y:auto; flex:1; }
+        .modal-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+        .m-stat { text-align:center; padding:14px; background:#f8fafc; border-radius:16px; }
+        .m-stat-val { font-size:20px; font-weight:800; color:var(--accent); }
+        .m-stat-lab { font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-top:3px; }
+        .section-sep { font-size:15px; font-weight:700; color:#1e293b; margin:20px 0 10px; display:flex; align-items:center; gap:8px; }
+        .section-sep i { color:var(--accent); }
+        .lessons-list { display:flex; flex-direction:column; gap:8px; }
+        .lesson-row { display:flex; align-items:center; gap:12px; padding:11px 14px; background:#fff; border:1px solid var(--card-border); border-radius:14px; cursor:pointer; transition:all 0.2s; }
+        .lesson-row:hover { border-color:var(--accent); box-shadow:0 3px 10px rgba(0,0,0,0.06); }
+        .lesson-num { width:30px; height:30px; border-radius:9px; background:var(--accent-glow); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+        .lesson-info { flex:1; }
+        .lesson-name { font-size:13px; font-weight:600; color:#1e293b; }
+        .lesson-dur { font-size:11px; color:#64748b; margin-top:2px; }
+        .lesson-play { width:30px; height:30px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; flex-shrink:0; }
+        .modal-actions-row { display:flex; gap:12px; padding-top:20px; border-top:1px solid var(--card-border); margin-top:20px; }
+        .act-btn { flex:1; padding:13px; border-radius:14px; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; font-family:inherit; }
+        .act-btn.primary { background:var(--accent); border:none; color:white; }
+        .act-btn.primary:hover { background:var(--accent-secondary); transform:translateY(-2px); }
+        .act-btn.secondary { background:#fff; border:2px solid var(--card-border); color:#475569; }
+        .act-btn.secondary:hover { border-color:var(--accent); color:var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+            <a href="index.html" class="sidebar-logo" style="text-decoration: none; color: inherit;">
+                <div class="sidebar-logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                <div>
+                    <div class="sidebar-logo-text">EduSmart</div>
+                    <div class="sidebar-logo-sub">Learning Platform</div>
+                </div>
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="edu-dashboard.html" class="nav-link">
+                        <i class="fas fa-th-large"></i><span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="course.html" class="nav-link active">
+                        <i class="fas fa-book-open"></i><span>Courses</span>
+                        <span class="nav-badge">12</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="skill.html" class="nav-link">
+                        <i class="fas fa-tools"></i><span>Skill Training</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="education.html" class="nav-link">
+                        <i class="fas fa-robot"></i><span>AI Learning Assistant</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="aicarrer.html" class="nav-link">
+                        <i class="fas fa-compass"></i><span>AI Career Advisor</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-user"></i><span>Account</span>
+                    </a>
+                </li>
+            </ul>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="page-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="menu-toggle" id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-header-title"><i class="fas fa-book-open"></i> Online Learning Courses</h1>
+                </div>
+                <div class="header-actions">
+                    <div class="user-profile-pill">
+                        <div class="user-avatar">JS</div>
+                        <div>
+                            <div class="user-name-text">John Smith</div>
+                            <div class="user-role-text">Student</div>
+                        </div>
+                    </div>
+                    <button class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Stats Row -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="fas fa-book-reader"></i></div>
+                        <div><div class="stat-value">24</div><div class="stat-label">Enrolled Courses</div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                        <div><div class="stat-value">18</div><div class="stat-label">Completed Lessons</div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon amber"><i class="fas fa-percentage"></i></div>
+                        <div><div class="stat-value">67%</div><div class="stat-label">Avg. Progress</div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pink"><i class="fas fa-certificate"></i></div>
+                        <div><div class="stat-value">5</div><div class="stat-label">Certificates Earned</div></div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-panel">
+                    <div class="filter-header">
+                        <div class="filter-title"><i class="fas fa-filter"></i> Filter Courses</div>
+                        <button class="clear-btn" id="clearFilters">Clear All</button>
+                    </div>
+                    <div class="filter-grid">
+                        <div class="filter-group" style="grid-column:span 2;">
+                            <label class="filter-label">Search</label>
+                            <input type="text" class="filter-input" placeholder="Search courses..." id="searchInput">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Category</label>
+                            <select class="filter-select" id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="technology">Technology</option>
+                                <option value="business">Business</option>
+                                <option value="health">Health & Wellness</option>
+                                <option value="finance">Finance</option>
+                                <option value="language">Languages</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Level</label>
+                            <select class="filter-select" id="levelFilter">
+                                <option value="">All Levels</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Duration</label>
+                            <select class="filter-select" id="durationFilter">
+                                <option value="">Any Duration</option>
+                                <option value="short">Short (1–3 hrs)</option>
+                                <option value="medium">Medium (3–6 hrs)</option>
+                                <option value="long">Long (6+ hrs)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Sort By</label>
+                            <select class="filter-select" id="sortFilter">
+                                <option value="popular">Most Popular</option>
+                                <option value="rated">Highest Rated</option>
+                                <option value="newest">Newest</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" style="align-self:flex-end;" id="applyFilters">
+                            <i class="fas fa-check"></i> Apply
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div class="section-header">
+                    <div class="section-title"><i class="fas fa-grid-2"></i> Course Categories</div>
+                    <a class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="categories-grid" id="categoriesContainer"></div>
+
+                <!-- Courses -->
+                <div class="section-header">
+                    <div class="section-title"><i class="fas fa-layer-group"></i> Available Courses</div>
+                    <a class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="courses-grid" id="coursesContainer"></div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Course Detail Modal -->
+    <div class="modal-overlay" id="courseModal">
+        <div class="modal-card">
+            <div class="modal-hero">
+                <img id="modalHeroImg" src="" alt="">
+                <div class="modal-hero-fade"></div>
+                <button class="modal-close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-stats" id="modalStats"></div>
+                <h2 id="modalTitle" style="font-size:22px;font-weight:800;color:#1e293b;margin-bottom:8px;"></h2>
+                <p id="modalDesc" style="font-size:14px;color:#64748b;line-height:1.7;margin-bottom:20px;"></p>
+                <div class="section-sep"><i class="fas fa-list"></i> Course Lessons</div>
+                <div class="lessons-list" id="modalLessons"></div>
+                <div class="modal-actions-row">
+                    <button class="act-btn primary" onclick="enrollNow()"><i class="fas fa-rocket"></i> Enroll Now — Free</button>
+                    <button class="act-btn secondary" onclick="closeModal()"><i class="fas fa-bookmark"></i> Save for Later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-icon"><i class="fas fa-check"></i></div>
+        <div class="toast-msg" id="toastMsg">Done!</div>
+    </div>
+
+    <script>
+    const categories = [
+        { id:'technology', label:'Technology', icon:'fa-laptop-code', cls:'cat-purple', desc:'Web, AI, Cloud & more', topics:['Python','React','AWS','ML'] },
+        { id:'business',   label:'Business',   icon:'fa-briefcase',   cls:'cat-amber',  desc:'Strategy, Marketing & Leadership', topics:['Marketing','Strategy','MBA Prep'] },
+        { id:'health',     label:'Health',     icon:'fa-heart',       cls:'cat-green',  desc:'Fitness, Nutrition & Mental Well-being', topics:['Yoga','Nutrition','Mindfulness'] },
+        { id:'finance',    label:'Finance',    icon:'fa-chart-line',  cls:'cat-pink',   desc:'Investing, Crypto & Budgeting', topics:['Investing','Crypto','Tax'] },
+        { id:'language',   label:'Languages',  icon:'fa-language',    cls:'cat-blue',   desc:'Speak with confidence worldwide', topics:['Spanish','French','Japanese'] },
+        { id:'design',     label:'Design',     icon:'fa-palette',     cls:'cat-teal',   desc:'UI/UX, Graphic & Motion Design', topics:['Figma','AfterEffects','Branding'] },
+    ];
+
+    const courses = [
+        { id:1, title:'Complete Web Development Bootcamp', cat:'technology', catLabel:'Technology', instructor:'Sarah Johnson', level:'beginner', duration:'42h', students:'18.2k', rating:4.8, reviews:1240, badge:'popular', img:'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80', desc:'Master HTML, CSS, JavaScript, Node.js, React and MongoDB in this all-in-one bootcamp. Build 20 real-world projects.', lessons:[{n:1,t:'Intro to HTML',d:'45 min'},{n:2,t:'CSS Fundamentals',d:'1h 10min'},{n:3,t:'JavaScript Basics',d:'2h 20min'},{n:4,t:'React Essentials',d:'3h 05min'},{n:5,t:'Node & Express',d:'2h 40min'}] },
+        { id:2, title:'AI & Machine Learning Masterclass', cat:'technology', catLabel:'Technology', instructor:'Dr. Michael Chen', level:'intermediate', duration:'56h', students:'12.4k', rating:4.9, reviews:890, badge:'trending', img:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80', desc:'Explore deep learning, neural networks, NLP and computer vision with hands-on Python projects using TensorFlow and PyTorch.', lessons:[{n:1,t:'Python for ML',d:'1h 30min'},{n:2,t:'Linear Regression',d:'55min'},{n:3,t:'Neural Networks',d:'2h 10min'},{n:4,t:'CNNs & Vision',d:'2h 50min'},{n:5,t:'NLP Pipeline',d:'1h 45min'}] },
+        { id:3, title:'Business Leadership & Strategy', cat:'business', catLabel:'Business', instructor:'Emily Roberts', level:'intermediate', duration:'28h', students:'9.1k', rating:4.7, reviews:620, badge:'new', img:'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80', desc:'Develop executive-level leadership skills, strategic thinking, and management frameworks from Fortune 500 advisors.', lessons:[{n:1,t:'Leadership Foundations',d:'1h 00min'},{n:2,t:'Strategic Planning',d:'1h 25min'},{n:3,t:'Change Management',d:'55min'},{n:4,t:'KPIs & OKRs',d:'45min'}] },
+        { id:4, title:'Financial Literacy & Investing 101', cat:'finance', catLabel:'Finance', instructor:'James Wilson', level:'beginner', duration:'18h', students:'22.5k', rating:4.6, reviews:1450, badge:'popular', img:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80', desc:'Master budgeting, stock market basics, ETF investing, and building a diversified portfolio for long-term wealth.', lessons:[{n:1,t:'Money Fundamentals',d:'40min'},{n:2,t:'Stock Market 101',d:'1h 15min'},{n:3,t:'ETFs Explained',d:'50min'},{n:4,t:'Portfolio Building',d:'1h 05min'}] },
+        { id:5, title:'Mindfulness & Stress Reduction', cat:'health', catLabel:'Health', instructor:'Dr. Lisa Park', level:'beginner', duration:'14h', students:'16.3k', rating:4.8, reviews:980, badge:'trending', img:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&q=80', desc:'Science-backed mindfulness practices, breathing techniques and CBT tools to reduce anxiety and build mental resilience.', lessons:[{n:1,t:'What is Mindfulness?',d:'30min'},{n:2,t:'Breathing Techniques',d:'45min'},{n:3,t:'Body Scan Meditation',d:'40min'},{n:4,t:'Stress Response',d:'55min'}] },
+        { id:6, title:'Spanish for Beginners', cat:'language', catLabel:'Languages', instructor:'Carlos Mendez', level:'beginner', duration:'32h', students:'31.7k', rating:4.9, reviews:2100, badge:'popular', img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80', desc:'Start speaking Spanish with confidence from day one. Learn vocabulary, grammar, and culture through immersive exercises.', lessons:[{n:1,t:'Greetings & Basics',d:'35min'},{n:2,t:'Numbers & Dates',d:'30min'},{n:3,t:'Present Tense Verbs',d:'50min'},{n:4,t:'Family & Home',d:'45min'},{n:5,t:'Travel Phrases',d:'55min'}] },
+        { id:7, title:'UI/UX Design with Figma', cat:'design', catLabel:'Design', instructor:'Ava Thompson', level:'intermediate', duration:'24h', students:'8.6k', rating:4.7, reviews:540, badge:'new', img:'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=600&q=80', desc:'Design pixel-perfect interfaces using Figma. Learn wireframing, prototyping, design systems, and user research.', lessons:[{n:1,t:'Figma Interface',d:'40min'},{n:2,t:'Design Principles',d:'1h 10min'},{n:3,t:'Wireframing',d:'1h 00min'},{n:4,t:'Prototyping',d:'1h 20min'}] },
+        { id:8, title:'Data Science with Python', cat:'technology', catLabel:'Technology', instructor:'Prof. Alan Nguyen', level:'advanced', duration:'68h', students:'7.4k', rating:4.8, reviews:730, badge:'trending', img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80', desc:'From pandas and numpy to matplotlib, scikit-learn, and advanced statistics — become a data scientist ready for real jobs.', lessons:[{n:1,t:'Pandas Crash Course',d:'1h 30min'},{n:2,t:'Data Visualization',d:'1h 20min'},{n:3,t:'Statistical Analysis',d:'2h 00min'},{n:4,t:'ML with Scikit-learn',d:'2h 30min'}] },
+        { id:9, title:'Digital Marketing Mastery', cat:'business', catLabel:'Business', instructor:'Rachel Kim', level:'beginner', duration:'22h', students:'14.8k', rating:4.5, reviews:860, badge:'new', img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80', desc:'Build and execute full digital marketing strategies — SEO, Google Ads, social media, email marketing and analytics.', lessons:[{n:1,t:'Marketing Fundamentals',d:'45min'},{n:2,t:'SEO from Scratch',d:'1h 20min'},{n:3,t:'Google Ads',d:'1h 10min'},{n:4,t:'Social Media Growth',d:'55min'}] },
+    ];
+
+    let currentPage = 1;
+    const perPage = 6;
+    let filtered = [...courses];
+    let selectedCourse = null;
+
+    function renderCategories() {
+        const el = document.getElementById('categoriesContainer');
+        el.innerHTML = categories.map(c => `
+            <div class="category-card" onclick="filterByCat('${c.id}')">
+                <div class="category-icon ${c.cls}"><i class="fas ${c.icon}"></i></div>
+                <div class="category-name">${c.label}</div>
+                <div class="category-desc">${c.desc}</div>
+                <div class="topic-tags">${c.topics.map(t=>`<span class="topic-tag">${t}</span>`).join('')}</div>
+            </div>
+        `).join('');
+    }
+
+    function starHtml(rating) {
+        const full = Math.floor(rating);
+        const half = rating % 1 >= 0.5 ? 1 : 0;
+        const empty = 5 - full - half;
+        return '⭐'.repeat(full) + (half ? '✨' : '') + ('☆').repeat(empty);
+    }
+
+    function renderCourses() {
+        const el = document.getElementById('coursesContainer');
+        const start = (currentPage - 1) * perPage;
+        const page = filtered.slice(start, start + perPage);
+        el.innerHTML = page.map(c => `
+            <div class="white-card course-card reveal" onclick="openModal(${c.id})">
+                <div class="course-thumbnail">
+                    <img src="${c.img}" alt="${c.title}" loading="lazy">
+                    <div class="course-badge badge-${c.badge}">${c.badge}</div>
+                    <button class="bookmark-btn" onclick="toggleBookmark(event,this)"><i class="fas fa-bookmark"></i></button>
+                </div>
+                <div class="course-header">
+                    <div class="course-cat-label">${c.catLabel}</div>
+                    <div class="course-title">${c.title}</div>
+                    <div class="course-instructor">
+                        <div class="instructor-avatar">${c.instructor.split(' ').map(x=>x[0]).join('')}</div>
+                        <span class="instructor-name">${c.instructor}</span>
+                    </div>
+                </div>
+                <div class="course-body">
+                    <div class="course-meta">
+                        <span class="meta-item"><i class="fas fa-clock"></i> ${c.duration}</span>
+                        <span class="level-badge level-${c.level}">${c.level}</span>
+                    </div>
+                    <div class="course-rating">
+                        <span class="stars" style="font-size:12px">${'★'.repeat(Math.round(c.rating))}${'☆'.repeat(5-Math.round(c.rating))}</span>
+                        <span class="rating-val">${c.rating}</span>
+                        <span class="review-cnt">(${c.reviews.toLocaleString()})</span>
+                    </div>
+                </div>
+                <div class="course-footer-inner">
+                    <span style="font-size:12px;color:#64748b;"><i class="fas fa-users" style="color:var(--accent);margin-right:4px;"></i>${c.students} students</span>
+                    <button class="enroll-btn-full" onclick="event.stopPropagation();enrollCourse('${c.title}')">
+                        <i class="fas fa-plus"></i> Enroll
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        triggerReveal();
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const total = Math.ceil(filtered.length / perPage);
+        const el = document.getElementById('pagination');
+        if (total <= 1) { el.innerHTML = ''; return; }
+        let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}><i class="fas fa-chevron-left"></i></button>`;
+        for (let i = 1; i <= total; i++) {
+            html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+        }
+        html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}><i class="fas fa-chevron-right"></i></button>`;
+        el.innerHTML = html;
+    }
+
+    function goPage(p) {
+        const total = Math.ceil(filtered.length / perPage);
+        if (p < 1 || p > total) return;
+        currentPage = p;
+        renderCourses();
+        document.querySelector('.content-area').scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filterByCat(cat) {
+        document.getElementById('categoryFilter').value = cat;
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const cat = document.getElementById('categoryFilter').value;
+        const level = document.getElementById('levelFilter').value;
+        filtered = courses.filter(c =>
+            (!search || c.title.toLowerCase().includes(search) || c.catLabel.toLowerCase().includes(search)) &&
+            (!cat   || c.cat === cat) &&
+            (!level || c.level === level)
+        );
+        const sort = document.getElementById('sortFilter').value;
+        if (sort === 'rated')   filtered.sort((a,b) => b.rating - a.rating);
+        if (sort === 'popular') filtered.sort((a,b) => parseFloat(b.students) - parseFloat(a.students));
+        currentPage = 1;
+        renderCourses();
+    }
+
+    function openModal(id) {
+        const c = courses.find(x => x.id === id);
+        if (!c) return;
+        selectedCourse = c;
+        document.getElementById('modalHeroImg').src = c.img;
+        document.getElementById('modalTitle').textContent = c.title;
+        document.getElementById('modalDesc').textContent = c.desc;
+        document.getElementById('modalStats').innerHTML = `
+            <div class="m-stat"><div class="m-stat-val">${c.rating}</div><div class="m-stat-lab">Rating</div></div>
+            <div class="m-stat"><div class="m-stat-val">${c.reviews.toLocaleString()}</div><div class="m-stat-lab">Reviews</div></div>
+            <div class="m-stat"><div class="m-stat-val">${c.duration}</div><div class="m-stat-lab">Duration</div></div>
+            <div class="m-stat"><div class="m-stat-val">${c.students}</div><div class="m-stat-lab">Students</div></div>
+        `;
+        document.getElementById('modalLessons').innerHTML = c.lessons.map(l => `
+            <div class="lesson-row">
+                <div class="lesson-num">${l.n}</div>
+                <div class="lesson-info"><div class="lesson-name">${l.t}</div><div class="lesson-dur"><i class="fas fa-clock" style="color:var(--accent);margin-right:4px;"></i>${l.d}</div></div>
+                <div class="lesson-play"><i class="fas fa-play"></i></div>
+            </div>
+        `).join('');
+        document.getElementById('courseModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('courseModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function enrollNow() {
+        closeModal();
+        if (selectedCourse) enrollCourse(selectedCourse.title);
+    }
+
+    function enrollCourse(title) {
+        document.getElementById('toastMsg').textContent = `Enrolled in "${title}"!`;
+        showToast();
+    }
+
+    function showToast() {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function toggleBookmark(e, btn) {
+        e.stopPropagation();
+        btn.classList.toggle('bookmarked');
+        document.getElementById('toastMsg').textContent = btn.classList.contains('bookmarked') ? 'Course bookmarked!' : 'Bookmark removed';
+        showToast();
+    }
+
+    function triggerReveal() {
+        setTimeout(() => {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        }, 50);
+    }
+
+    document.getElementById('clearFilters').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('levelFilter').value = '';
+        document.getElementById('durationFilter').value = '';
+        document.getElementById('sortFilter').value = 'popular';
+        filtered = [...courses];
+        currentPage = 1;
+        renderCourses();
+    });
+
+    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    document.getElementById('courseModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // Init
+    renderCategories();
+    renderCourses();
+    </script>
+    <!-- LiveChatAI Embed -->
+    <script src="https://app.livechatai.com/embed.js" data-id="cmfz1zexb0001la04iulo7jea" async defer></script>
+</body>
+</html>

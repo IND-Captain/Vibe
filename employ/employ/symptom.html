@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Symptom Checker - Arogya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <style>
+        :root {
+            --primary: #007aff;
+            --primary-light: #00b4d8;
+            --primary-lighter: #90e0ef;
+            --white: rgba(255, 255, 255, 0.9);
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --gradient: linear-gradient(135deg, var(--primary-light), var(--primary));
+
+            /* Role-specific hues */
+            --patient-hue: 240deg;
+            /* Indigo */
+            --doctor-hue: 160deg;
+            /* Teal */
+            --admin-hue: 210deg;
+            /* Blue */
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB;
+            color: #111827;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            zoom: 0.85;
+        }
+
+        /* --- Glassmorphism Helper --- */
+        .glass-panel {
+            background: #ffffff;
+            border: 1px solid #E5E7EB;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-panel:hover:not(.no-hover) {
+            box-shadow: 0 8px 30px rgba(0,122,255,0.12);
+            transform: translateY(-4px);
+        }
+
+        /* --- Button Styles --- */
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--text-primary);
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* --- Navbar --- */
+        .navbar-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #F9FAFB;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            background: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 100px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #111827;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #10B981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #4B5563;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #111827;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .login-btn {
+            color: #4B5563;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-decoration: none;
+        }
+
+        .get-started-btn {
+            background: #111827;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+            text-decoration: none;
+        }
+
+        .get-started-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 1024px) {
+            .nav-links { display: none; }
+        }
+
+        /* --- Main Content --- */
+        .main-container {
+            padding: 2rem 5% 4rem;
+            width: 100%;
+            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: #4B5563;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- Symptom Checker Layout --- */
+        .symptom-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            min-height: 70vh;
+        }
+
+        @media (min-width: 992px) {
+            .symptom-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Chat Container */
+        .chat-container {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-bubble {
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            max-width: 80%;
+            line-height: 1.5;
+            animation: pop-in 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .chat-bubble.user {
+            background: var(--gradient);
+            color: var(--text-primary);
+            border-bottom-right-radius: 5px;
+            align-self: flex-end;
+        }
+
+        .chat-bubble.bot {
+            background: #F3F4F6;
+            border: 1px solid #E5E7EB;
+            color: #111827;
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9CA3AF;
+            animation: typing 1.2s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Chat Input */
+        .chat-input-form {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 50px;
+            color: #111827;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-lighter);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            margin-top: 4rem;
+            padding: 4rem 5% 2rem;
+            background: #F3F4F6;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-column h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .footer-column h4::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--primary-light);
+        }
+
+        .footer-column p,
+        .footer-column a {
+            color: #4B5563;
+            text-decoration: none;
+            margin-bottom: 0.75rem;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column a:hover {
+            color: #007aff;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-icons a {
+            font-size: 1.5rem;
+            color: #4B5563;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: #007aff;
+            transform: scale(1.1);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #E5E7EB;
+            font-size: 0.9rem;
+            color: #9CA3AF;
+        }
+
+        @media (max-width: 768px) {
+            .main-container { padding: 2rem 3% 3rem; }
+            .page-header h1 { font-size: 2.5rem; }
+            .chat-container { height: 60vh; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar-container">
+        <nav class="navbar">
+            <a href="health.html" class="logo">
+                <div class="logo-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </div>
+                HealthPlus
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="symptom.html" class="active">Symptom Checker</a></li>
+                <li><a href="hospital-finder.html">Hospital Finder</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="telemedicine.html">Telemedicine</a></li>
+                <li><a href="health-dashboard.html">Dashboard</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="login.html" class="login-btn">Log in</a>
+                <a href="login.html" class="get-started-btn">Get Started <span>→</span></a>
+            </div>
+        </nav>
+    </div>
+
+    <main class="main-container">
+        <header class="page-header">
+            <h1 data-lang-key="symptomTitle">AI Symptom Checker</h1>
+            <p data-lang-key="symptomSubtitle">Describe your symptoms to get an intelligent analysis.</p>
+        </header>
+
+        <div class="symptom-layout">
+            <div class="glass-panel no-hover" id="spline-container"
+                style="min-height: 70vh; overflow: hidden; padding: 0; position: relative;">
+                <iframe src='https://my.spline.design/nancylookingaround-kgZLY8E1RpIQAbnTseZxSBNm/?logo=0'
+                    frameborder='0' width='100%' height='100%' style="border: none; transform: scale(1.4); transform-origin: center center;"></iframe>
+            </div>
+            <div class="glass-panel no-hover chat-container">
+                <div class="chat-header" style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+                    <div class="glass-select-wrapper" style="margin: 0;">
+                        <select id="chat-lang-selector" class="glass-select"
+                            style="padding: 0.5rem 2rem 0.5rem 1rem; font-size: 0.9rem;">
+                            <option value="en-US">English</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="te-IN">Telugu</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chat-box" id="chat-box">
+                    <div class="chat-bubble bot" data-lang-key="chatBot1">
+                        Hello! I am Arogya's AI assistant. Please describe your symptoms.
+                    </div>
+                </div>
+                <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                    <span></span><span></span><span></span>
+                </div>
+                <form class="chat-input-form" id="chat-form">
+                    <button type="button" class="btn btn-secondary upload-btn" id="upload-btn"
+                        style="width: 50px; height: 50px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 0.5rem;">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="file-upload" style="display: none;">
+                    <button type="button" class="btn btn-secondary voice-btn" id="voice-btn"
+                        style="width: 50px; height: 50px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Type your symptoms..."
+                        autocomplete="off">
+                    <button type="submit" class="btn btn-primary send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h4 data-lang-key="footerAbout">About Arogya</h4>
+                <p data-lang-key="footerAboutText">Arogya is an intelligent telemedicine and healthcare ecosystem
+                    designed to provide smart, compassionate, and accessible healthcare for everyone.</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4 data-lang-key="footerQuickLinks">Quick Links</h4>
+                <a href="index.html" data-lang-key="navHome">Home</a>
+                <a href="about.html" data-lang-key="navAbout">About Us</a>
+                <a href="symptom.html" data-lang-key="navSymptom">Symptom Checker</a>
+                <a href="pharmacy.html" data-lang-key="navPharmacy">Pharmacy</a>
+            </div>
+            <div class="footer-column">
+                <h4 data-lang-key="footerContact">Contact Info</h4>
+                <p><i class="fas fa-map-marker-alt"></i> 123 Health St, Medicity</p>
+                <p><i class="fas fa-phone-alt"></i> +1 (555) 123-4567</p>
+                <p><i class="fas fa-envelope"></i> support@arogya.ai</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 Arogya. All rights reserved.
+        </div>
+    </footer>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- AI Chat Functionality ---
+            const translations = {
+                en: {
+                    navHome: "Home",
+                    navAbout: "About Us",
+                    navSymptom: "AI Checker",
+                    navTelemedicine: "Telemedicine",
+                    navPharmacy: "Pharmacy",
+                    navDonors: "Blood Donors",
+                    navDashboard: "Dashboard",
+                    navPatients: "Patients",
+                    navAppointments: "Appointments",
+                    navPrescription: "Create Prescription",
+                    navAdminDashboard: "Dashboard",
+                    navUserMgmt: "User Mgmt",
+                    navAnalytics: "Analytics",
+                    navSettings: "Settings",
+                    navContact: "Contact",
+                    navLogin: "Login / Sign Up",
+                    symptomTitle: "AI Symptom Checker",
+                    symptomSubtitle: "Describe your symptoms to get an intelligent analysis.",
+                    chatBot1: "Hello! I am Arogya's AI assistant. Please describe your symptoms.",
+                    chatBot2: "Thank you. To clarify, are you experiencing any fever or body aches?",
+                    chatBot3: "I understand. Based on your symptoms of a cough, headache, and tiredness, I am analyzing the probable causes.",
+                    uploadTitle: "Upload Reports",
+                    uploadDesc: "You can also upload lab reports or images for analysis.",
+                    loaderText: "Analyzing your symptoms...",
+                    resultsTitle: "Probable Conditions",
+                    condition1Title: "1. Viral Fever (High Probability)",
+                    condition1Desc: "Common symptoms include high fever, headache, and body aches. Rest and hydration are key.",
+                    condition2Title: "2. Common Cold (Moderate Probability)",
+                    condition2Desc: "Often includes a runny nose and cough, which you also mentioned. Fever is less common.",
+                    condition3Title: "3. Fatigue (Symptom)",
+                    condition3Desc: "The body aches and tiredness are signs of fatigue, common in many illnesses.",
+                    btnBookNow: "Book Doctor Now",
+                    footerAbout: "About Arogya",
+                    footerAboutText: "Arogya is an intelligent telemedicine and healthcare ecosystem designed to provide smart, compassionate, and accessible healthcare for everyone.",
+                    footerQuickLinks: "Quick Links",
+                    footerContact: "Contact Info"
+                },
+                hi: {
+                    navHome: "होम",
+                    navAbout: "हमारे बारे में",
+                    navSymptom: "लक्षण परीक्षक",
+                    navTelemedicine: "टेलीमेडिसिन",
+                    navPharmacy: "फार्मेसी",
+                    navDonors: "रक्त दाता",
+                    navDashboard: "डैशबोर्ड",
+                    navPatients: "मरीजों",
+                    navAppointments: "मुलाकातें",
+                    navPrescription: "प्रिस्क्रिप्शन बनाएं",
+                    navAdminDashboard: "डैशबोर्ड",
+                    navUserMgmt: "उपयोगकर्ता प्रबंधन",
+                    navAnalytics: "विश्लेषिकी",
+                    navSettings: "सेटिंग्स",
+                    navContact: "संपर्क",
+                    navLogin: "लॉगिन / साइन अप",
+                    symptomTitle: "AI लक्षण परीक्षक",
+                    symptomSubtitle: "बुद्धिमान विश्लेषण प्राप्त करने के लिए अपने लक्षणों का वर्णन करें।",
+                    chatBot1: "नमस्ते! मैं आरोग्य का AI सहायक हूँ। कृपया अपने लक्षणों का वर्णन करें।",
+                    chatBot2: "धन्यवाद। स्पष्ट करने के लिए, क्या आपको बुखार या शरीर में दर्द का अनुभव हो रहा है?",
+                    chatBot3: "मैं समझ गया। खांसी, सिरदर्द और थकान के आपके लक्षणों के आधार पर, मैं संभावित कारणों का विश्लेषण कर रहा हूँ।",
+                    uploadTitle: "रिपोर्ट अपलोड करें",
+                    uploadDesc: "आप विश्लेषण के लिए लैब रिपोर्ट या चित्र भी अपलोड कर सकते हैं।",
+                    loaderText: "आपके लक्षणों का विश्लेषण किया जा रहा है...",
+                    resultsTitle: "संभावित स्थितियाँ",
+                    condition1Title: "1. वायरल फीवर (उच्च संभावना)",
+                    condition1Desc: "आम लक्षणों में तेज बुखार, सिरदर्द और बदन दर्द शामिल हैं। आराम और हाइड्रेशन महत्वपूर्ण हैं।",
+                    condition2Title: "2. सामान्य सर्दी (मध्यम संभावना)",
+                    condition2Desc: "इसमें अक्सर बहती नाक और खांसी शामिल होती है, जैसा कि आपने भी उल्लेख किया है। बुखार कम आम है।",
+                    condition3Title: "3. थकान (लक्षण)",
+                    condition3Desc: "शरीर में दर्द और थकान, थकान के लक्षण हैं, जो कई बीमारियों में आम हैं।",
+                    btnBookNow: "अभी डॉक्टर बुक करें",
+                    footerAbout: "आरोग्य के बारे में",
+                    footerAboutText: "आरोग्य एक बुद्धिमान टेलीमेडिसिन और हेल्थकेयर इकोसिस्टम है जिसे सभी के लिए स्मार्ट, दयालु और सुलभ स्वास्थ्य सेवा प्रदान करने के लिए डिज़ाइन किया गया है।",
+                    footerQuickLinks: "त्वरित लिंक्स",
+                    footerContact: "संपर्क जानकारी"
+                },
+                te: {
+                    navHome: "హోమ్",
+                    navAbout: "మా గురించి",
+                    navSymptom: "AI లక్షణ తనిఖీ",
+                    navTelemedicine: "టెలిమెడిసిన్",
+                    navPharmacy: "ఫార్మసీ",
+                    navDonors: "రక్త దాతలు",
+                    navDashboard: "డాష్బోర్డ్",
+                    navPatients: "రోగులు",
+                    navAppointments: "అపాయింట్‌మెంట్లు",
+                    navPrescription: "ప్రిస్క్రిప్షన్ సృష్టించండి",
+                    navAdminDashboard: "డాష్బోర్డ్",
+                    navUserMgmt: "వినియోగదారు నిర్వహణ",
+                    navAnalytics: "విశ్లేషణలు",
+                    navSettings: "సెట్టింగ్‌లు",
+                    navContact: "సంప్రదించండి",
+                    navLogin: "లాగిన్ / సైన్ అప్",
+                    symptomTitle: "AI లక్షణ తనిఖీ",
+                    symptomSubtitle: "తెలివైన విశ్లేషణ పొందడానికి మీ లక్షణాలను వివరించండి.",
+                    chatBot1: "నమస్కారం! నేను ఆరోగ్య AI సహాయకుడిని. దయచేసి మీ లక్షణాలను వివరించండి.",
+                    chatBot2: "ధన్యవాదాలు. స్పష్టం చేయడానికి, మీరు జ్వరం లేదా ఒళ్లు నొప్పులతో బాధపడుతున్నారా?",
+                    chatBot3: "నాకు అర్థమైంది. మీకు ఉన్న దగ్గు, తలనొప్పి మరియు అలసట లక్షణాల ఆధారంగా, నేను సంభావ్య కారణాలను విశ్లేషిస్తున్నాను.",
+                    uploadTitle: "నివేదికలను అప్‌లోడ్ చేయండి",
+                    uploadDesc: "మీరు విశ్లేషణ కోసం ల్యాబ్ నివేదికలు లేదా చిత్రాలను కూడా అప్‌లోడ్ చేయవచ్చు.",
+                    loaderText: "మీ లక్షణాలు విశ్లేషించబడుతున్నాయి...",
+                    resultsTitle: "సంభావ్య పరిస్థితులు",
+                    condition1Title: "1. వైరల్ ఫీవర్ (అధిక సంభావ్యత)",
+                    condition1Desc: "సాధారణ లక్షణాలు అధిక జ్వరం, తలనొప్పి మరియు శరీర నొప్పులు. విశ్రాంతి మరియు హైడ్రేషన్ కీలకం.",
+                    condition2Title: "2. సాధారణ జలుబు (మితమైన సంభావ్యత)",
+                    condition2Desc: "మీరు చెప్పినట్లుగా, ముక్కు కారడం మరియు దగ్గు ఉంటాయి. జ్వరం తక్కువగా ఉంటుంది.",
+                    condition3Title: "3. అలసట (లక్షణం)",
+                    condition3Desc: "శరీర నొప్పులు మరియు అలసట, అనేక వ్యాధులలో సాధారణమైనవి.",
+                    btnBookNow: "ఇప్పుడే డాక్టర్‌ను బుక్ చేయండి",
+                    footerAbout: "ఆరోగ్య గురించి",
+                    footerAboutText: "ఆరోగ్య అనేది ప్రతిఒక్కరికీ స్మార్ట్, కారుణ్య మరియు ప్రాప్యత ఆరోగ్య సంరక్షణను అందించడానికి రూపొందించబడిన ఒక తెలివైన టెలిమెడిసిన్ మరియు ఆరోగ్య సంరక్షణ పర్యావరణ వ్యవస్థ.",
+                    footerQuickLinks: "త్వరిత లింకులు",
+                    footerContact: "సంప్రదింపు సమాచారం"
+                }
+            };
+
+            // --- AI Chat Functionality ---
+            const OPENROUTER_API_KEY = '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';
+            const chatBox = document.getElementById('chat-box');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const voiceBtn = document.getElementById('voice-btn');
+            const uploadBtn = document.getElementById('upload-btn');
+            const fileUpload = document.getElementById('file-upload');
+            const chatLangSelector = document.getElementById('chat-lang-selector');
+
+            let chatHistory = [
+                {
+                    role: 'system',
+                    content: 'You are a professional AI health assistant for the Arogya healthcare platform. Your goal is to analyze user symptoms and medical reports. When analyzing reports, specifically address: 1. What happened (diagnosis analysis), 2. What medicine to take (if applicable), 3. Timing and dosage (e.g., grams/units, when to take). Do not say you cannot perform an analysis. Provide direct, clear, and specific suggestions. Respond in the language that matches the user language preference.'
+                }
+            ];
+
+            // Send message function
+            async function sendMessage(customMessage = null) {
+                const message = customMessage || chatInput.value.trim();
+                if (!message) return;
+
+                addMessage(message, 'user');
+                if (!customMessage) chatInput.value = '';
+
+                showTypingIndicator();
+
+                try {
+                    const langName = chatLangSelector.options[chatLangSelector.selectedIndex].text;
+                    const prompt = `User speaks ${langName}. Message: ${message}`;
+
+                    chatHistory.push({ role: 'user', content: prompt });
+
+                    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                            'HTTP-Referer': window.location.origin,
+                            'X-Title': 'Arogya Health Assistant'
+                        },
+                        body: JSON.stringify({
+                            model: 'google/gemini-2.0-flash-001',
+                            messages: chatHistory,
+                            temperature: 0.7
+                        })
+                    });
+
+                    hideTypingIndicator();
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API error: ${errorData.error?.message || response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.choices && data.choices[0]) {
+                        const aiResponse = data.choices[0].message.content;
+                        chatHistory.push({ role: 'bot', content: aiResponse });
+                        addMessage(aiResponse, 'bot');
+                        speakText(aiResponse);
+                    } else {
+                        addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                    }
+                } catch (error) {
+                    console.error('OpenRouter API Error:', error);
+                    hideTypingIndicator();
+                    addMessage(`Error: ${error.message}. Please check your connection or API key.`, 'bot');
+                }
+            }
+
+            function showTypingIndicator() {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.style.display = 'flex';
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            }
+
+            function hideTypingIndicator() {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.style.display = 'none';
+            }
+
+            function addMessage(text, sender) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('chat-bubble', sender);
+
+                // Use innerHTML for markdown-like formatting if needed, but for now textContent
+                bubble.innerText = text;
+
+                chatBox.appendChild(bubble);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            // --- Voice & TTS ---
+            let recognition;
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    voiceBtn.style.background = 'var(--primary)';
+                    voiceBtn.style.color = 'white';
+                    chatInput.placeholder = "Listening...";
+                };
+
+                recognition.onend = () => {
+                    voiceBtn.style.background = '';
+                    voiceBtn.style.color = '';
+                    chatInput.placeholder = "Type your symptoms...";
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    chatInput.value = transcript;
+                    sendMessage();
+                };
+
+                voiceBtn.addEventListener('click', () => {
+                    recognition.lang = chatLangSelector.value;
+                    recognition.start();
+                });
+            } else {
+                voiceBtn.style.display = 'none';
+            }
+
+            let voices = [];
+            function loadVoices() {
+                voices = window.speechSynthesis.getVoices();
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+                loadVoices();
+            }
+
+            function speakText(text) {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    const selectedLang = chatLangSelector.value;
+                    utterance.lang = selectedLang;
+
+                    // Priority voice matching
+                    const voice = voices.find(v => v.lang === selectedLang) ||
+                        voices.find(v => v.lang.startsWith(selectedLang.split('-')[0])) ||
+                        voices.find(v => v.lang.includes(selectedLang.split('-')[0]));
+
+                    if (voice) utterance.voice = voice;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            // --- Medical Report Analysis (OCR) ---
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+            async function extractTextFromReport(file) {
+                const isImage = file.type.startsWith('image/');
+                const isPDF = file.type === 'application/pdf';
+
+                if (!isImage && !isPDF) {
+                    throw new Error("Unsupported file type");
+                }
+
+                let extractedText = "";
+
+                if (isImage) {
+                    const worker = await Tesseract.createWorker('eng');
+                    const ret = await worker.recognize(file);
+                    extractedText = ret.data.text;
+                    await worker.terminate();
+                } else if (isPDF) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    const numPages = Math.min(pdf.numPages, 2); // Limit to 2 pages
+                    const worker = await Tesseract.createWorker('eng');
+
+                    for (let i = 1; i <= numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: 2.0 });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        const imageData = canvas.toDataURL('image/png');
+                        const ret = await worker.recognize(imageData);
+                        extractedText += `\n--- Page ${i} ---\n` + ret.data.text;
+                    }
+                    await worker.terminate();
+                }
+                return extractedText;
+            }
+
+            async function handleReportUpload(file) {
+                addMessage(`Analyzing medical report: ${file.name}...`, 'bot');
+                showTypingIndicator();
+
+                try {
+                    const extractedText = await extractTextFromReport(file);
+                    hideTypingIndicator();
+
+                    if (!extractedText.trim()) {
+                        addMessage("Report analysis failed: No text could be extracted.", 'bot');
+                        return;
+                    }
+
+                    addMessage("Report content extracted. Analyzing now...", 'bot');
+                    const analysisRequest = `I have uploaded a medical report. Here is the extracted text: \n\n ${extractedText} \n\n Please analyze this report and tell me: 1. What is happening? 2. What medicine should I take? 3. Timing and dosage.`;
+                    await sendMessage(analysisRequest);
+
+                } catch (error) {
+                    console.error("Report Analysis Error:", error);
+                    hideTypingIndicator();
+                    addMessage("Failed to process the report.", 'bot');
+                }
+            }
+
+            if (uploadBtn && fileUpload) {
+                uploadBtn.addEventListener('click', () => fileUpload.click());
+                fileUpload.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleReportUpload(e.target.files[0]);
+                    }
+                });
+            }
+
+            if (chatForm) {
+                chatForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    sendMessage();
+                });
+            }
+
+            // --- Check for Incoming Analysis Requests (from Records, etc.) ---
+            const incomingAnalysis = sessionStorage.getItem('aiAnalysisData');
+
+            function dataURItoBlob(dataURI) {
+                try {
+                    var byteString = atob(dataURI.split(',')[1]);
+                    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+                    var ab = new ArrayBuffer(byteString.length);
+                    var ia = new Uint8Array(ab);
+                    for (var i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    return new Blob([ab], { type: mimeString });
+                } catch (e) {
+                    console.error("Blob conversion error", e);
+                    return null;
+                }
+            }
+
+            if (incomingAnalysis) {
+                try {
+                    const data = JSON.parse(incomingAnalysis);
+                    sessionStorage.removeItem('aiAnalysisData'); // Clear after use
+
+                    if (data) {
+                        setTimeout(async () => {
+                            addMessage("I see you've sent a medical record for analysis.", 'bot');
+
+                            let combinedText = data.text;
+
+                            if (data.attachment) {
+                                addMessage(`Processing attached file: ${data.attachment.name}...`, 'bot');
+                                showTypingIndicator();
+                                try {
+                                    const blob = dataURItoBlob(data.attachment.data);
+                                    if (blob) {
+                                        // Mock File object properties for extractTextFromReport
+                                        // blob.name = data.attachment.name; // Blob doesn't typically have name, but we can pass it if needed or just use blob
+                                        // We need a File object for some APIs probably, but extractTextFromReport uses generic File/Blob methods (type, arrayBuffer)
+                                        // Tesseract recognize accepts Blob/File/URL.
+
+                                        // Allow extractTextFromReport to handle it. Adding type property manually if missing from Blob constructor in some envs (it is usually there)
+
+                                        const extracted = await extractTextFromReport(blob);
+                                        combinedText += `\n\n[ATTACHED REPORT CONTENT]:\n${extracted}`;
+                                        addMessage("Attachment processed successfully.", 'bot');
+                                    } else {
+                                        addMessage("Could not process attachment.", 'bot');
+                                    }
+                                } catch (attErr) {
+                                    console.error("Attachment processing error", attErr);
+                                    addMessage("Failed to read the attached file.", 'bot');
+                                }
+                                hideTypingIndicator();
+                            }
+
+                            addMessage("Reviewing the complete record now...", 'bot');
+                            sendMessage(combinedText);
+                        }, 1000);
+                    }
+                } catch (e) {
+                    console.error("Error parsing analysis data", e);
+                }
+            }
+
+
+
+        });
+    </script>
+    <!-- LiveChatAI Embed -->
+    <script src="https://app.livechatai.com/embed.js" data-id="cmfz1zexb0001la04iulo7jea" async defer></script>
+</body>
+
+</html>

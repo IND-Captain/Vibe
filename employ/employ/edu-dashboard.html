@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Dashboard – EduSmart</title>
+    <meta name="description" content="Track your learning progress, streaks, and achievements on EduSmart's dashboard.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+        }
+        @media(max-width:1100px){ .dashboard-grid { grid-template-columns: 1fr; } }
+
+        /* Streak Banner */
+        .streak-banner {
+            background: linear-gradient(90deg, rgba(245,158,11,.08), rgba(251,191,36,.07));
+            border: 1px solid rgba(245,158,11,.22);
+            border-radius: 22px;
+            padding: 22px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .streak-left { display:flex; align-items:center; gap:18px; }
+        .streak-fire { font-size: 44px; }
+        .streak-count { font-size: 30px; font-weight: 800; color: #d97706; }
+        .streak-label { font-size: 13px; color: #64748b; font-weight: 500; margin-top: 2px; }
+        .streak-dots { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+        .streak-dot { width: 32px; height: 32px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-size:12px; }
+        .sd-active { background: #f59e0b; color:white; }
+        .sd-done   { background: rgba(245,158,11,.15); color:#d97706; }
+        .sd-empty  { background: #f1f5f9; color:#94a3b8; }
+
+        /* Progress Cards */
+        .in-progress-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+        .in-prog-card { background:#fff; border:1px solid var(--card-border); border-radius:18px; padding:18px; display:flex; align-items:center; gap:14px; box-shadow:0 2px 6px rgba(0,0,0,0.04); transition:all 0.3s; }
+        .in-prog-card:hover { transform:translateY(-3px); border-color:var(--accent); box-shadow:0 10px 20px rgba(0,0,0,0.07); }
+        .prog-thumb { width:56px; height:56px; border-radius:14px; object-fit:cover; flex-shrink:0; }
+        .prog-info { flex:1; min-width:0; }
+        .prog-name { font-size:13px; font-weight:700; color:#1e293b; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .prog-cat  { font-size:11px; color:var(--accent); font-weight:600; margin-bottom:8px; }
+        .prog-pct  { font-size:11px; color:#64748b; margin-top:5px; font-weight:600; }
+
+        /* Activity Chart */
+        .chart-card { background:#fff; border:1px solid var(--card-border); border-radius:22px; padding:24px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px; }
+        .chart-bars { display:flex; align-items:flex-end; gap:10px; height:120px; padding:0 4px; margin-top:18px; }
+        .chart-col { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+        .chart-bar { width:100%; border-radius:6px 6px 0 0; background:linear-gradient(to top,var(--accent),#818cf8); transition:height 0.8s ease; min-height:4px; }
+        .chart-day { font-size:11px; color:#94a3b8; font-weight:600; }
+
+        /* Right Sidebar Panel */
+        .right-panel { display:flex; flex-direction:column; gap:22px; }
+
+        /* Recommended */
+        .rec-card { background:#fff; border:1px solid var(--card-border); border-radius:22px; padding:22px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .rec-title { font-size:15px; font-weight:700; color:#1e293b; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+        .rec-title i { color:var(--accent); }
+        .rec-item { display:flex; align-items:center; gap:12px; padding:10px; border-radius:14px; cursor:pointer; transition:all 0.2s; margin-bottom:4px; }
+        .rec-item:hover { background:#f8fafc; }
+        .rec-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+        .ri-pu { background:rgba(99,102,241,.12); color:#6366f1; }
+        .ri-or { background:rgba(249,115,22,.12); color:#f97316; }
+        .ri-gr { background:rgba(34,197,94,.12); color:#22c55e; }
+        .ri-pk { background:rgba(236,72,153,.12); color:#ec4899; }
+        .rec-name { font-size:13px; font-weight:600; color:#1e293b; }
+        .rec-meta { font-size:11px; color:#64748b; margin-top:2px; }
+
+        /* Achievements */
+        .badge-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+        .ach-badge { background:#f8fafc; border:1px solid var(--card-border); border-radius:14px; padding:14px 8px; text-align:center; transition:all 0.25s; }
+        .ach-badge:hover { border-color:var(--accent); background:var(--accent-glow); }
+        .ach-icon { font-size:26px; margin-bottom:6px; }
+        .ach-name { font-size:11px; font-weight:700; color:#1e293b; line-height:1.3; }
+        .ach-date { font-size:10px; color:#94a3b8; margin-top:2px; }
+
+        /* Upcoming */
+        .upcoming-item { display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--card-border); border-radius:14px; margin-bottom:8px; background:#fff; }
+        .upcoming-date-box { width:44px; height:44px; border-radius:12px; background:var(--accent-glow); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; }
+        .ud-day { font-size:16px; font-weight:800; color:var(--accent); line-height:1; }
+        .ud-mon { font-size:10px; color:var(--accent); font-weight:600; }
+        .upcoming-name { font-size:13px; font-weight:600; color:#1e293b; }
+        .upcoming-time { font-size:11px; color:#94a3b8; margin-top:3px; }
+
+        /* Recent Activity */
+        .activity-list { display:flex; flex-direction:column; gap:8px; }
+        .activity-item { display:flex; align-items:center; gap:12px; padding:11px 14px; background:#fff; border:1px solid var(--card-border); border-radius:14px; }
+        .act-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+        .ad-green  { background:#22c55e; }
+        .ad-blue   { background:#3b82f6; }
+        .ad-amber  { background:#f59e0b; }
+        .ad-purple { background:#8b5cf6; }
+        .act-text { flex:1; font-size:13px; color:#475569; }
+        .act-text strong { color:#1e293b; font-weight:600; }
+        .act-time { font-size:11px; color:#94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <a href="index.html" class="sidebar-logo" style="text-decoration: none; color: inherit;">
+                <div class="sidebar-logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                <div>
+                    <div class="sidebar-logo-text">EduSmart</div>
+                    <div class="sidebar-logo-sub">Learning Platform</div>
+                </div>
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="edu-dashboard.html" class="nav-link active"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="course.html" class="nav-link"><i class="fas fa-book-open"></i><span>Courses</span><span class="nav-badge">12</span></a></li>
+                <li class="nav-item"><a href="skill.html" class="nav-link"><i class="fas fa-tools"></i><span>Skill Training</span></a></li>
+                <li class="nav-item"><a href="education.html" class="nav-link"><i class="fas fa-robot"></i><span>AI Learning Assistant</span></a></li>
+                <li class="nav-item"><a href="aicarrer.html" class="nav-link"><i class="fas fa-compass"></i><span>AI Career Advisor</span></a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user"></i><span>Account</span></a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+                    <h1 class="page-header-title"><i class="fas fa-th-large"></i> Learning Dashboard</h1>
+                </div>
+                <div class="header-actions">
+                    <div class="user-profile-pill">
+                        <div class="user-avatar">JS</div>
+                        <div><div class="user-name-text">John Smith</div><div class="user-role-text">Student</div></div>
+                    </div>
+                    <button class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-card reveal"><div class="stat-icon purple"><i class="fas fa-book-reader"></i></div><div><div class="stat-value" id="sEnrolled">24</div><div class="stat-label">Enrolled Courses</div></div></div>
+                    <div class="stat-card reveal"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div><div class="stat-value" id="sCompleted">18</div><div class="stat-label">Lessons Completed</div></div></div>
+                    <div class="stat-card reveal"><div class="stat-icon amber"><i class="fas fa-clock"></i></div><div><div class="stat-value" id="sHours">126</div><div class="stat-label">Hours Learned</div></div></div>
+                    <div class="stat-card reveal"><div class="stat-icon pink"><i class="fas fa-certificate"></i></div><div><div class="stat-value" id="sCerts">5</div><div class="stat-label">Certificates</div></div></div>
+                </div>
+
+                <!-- Streak Banner -->
+                <div class="streak-banner reveal">
+                    <div class="streak-left">
+                        <div class="streak-fire">🔥</div>
+                        <div>
+                            <div class="streak-count">28 Days</div>
+                            <div class="streak-label">Current Learning Streak — Keep it up!</div>
+                        </div>
+                    </div>
+                    <div class="streak-dots" id="streakDots"></div>
+                </div>
+
+                <!-- Main grid -->
+                <div class="dashboard-grid">
+                    <!-- Left Column -->
+                    <div>
+                        <!-- Activity Chart -->
+                        <div class="chart-card reveal">
+                            <div class="section-header" style="margin-bottom:0;">
+                                <div class="section-title"><i class="fas fa-chart-bar"></i> Weekly Learning Activity</div>
+                                <span style="font-size:12px;color:#64748b;">Last 7 days</span>
+                            </div>
+                            <div class="chart-bars" id="actChart"></div>
+                        </div>
+
+                        <!-- Courses In Progress -->
+                        <div class="section-header" style="margin-top:28px;">
+                            <div class="section-title"><i class="fas fa-spinner"></i> Courses In Progress</div>
+                            <a class="view-all-link" href="course.html">View All <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="in-progress-grid" id="inProgressGrid"></div>
+
+                        <!-- Recent Activity -->
+                        <div class="section-header" style="margin-top:28px;">
+                            <div class="section-title"><i class="fas fa-history"></i> Recent Activity</div>
+                        </div>
+                        <div class="activity-list" id="activityList"></div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="right-panel">
+                        <!-- Recommendations -->
+                        <div class="rec-card reveal">
+                            <div class="rec-title"><i class="fas fa-bolt"></i> Recommended for You</div>
+                            <div id="recList"></div>
+                        </div>
+
+                        <!-- Achievements -->
+                        <div class="rec-card reveal">
+                            <div class="rec-title"><i class="fas fa-trophy"></i> Achievements</div>
+                            <div class="badge-grid" id="badgeGrid"></div>
+                        </div>
+
+                        <!-- Upcoming Sessions -->
+                        <div class="rec-card reveal">
+                            <div class="rec-title"><i class="fas fa-calendar-alt"></i> Upcoming Sessions</div>
+                            <div id="upcomingList"></div>
+                            <button class="btn-outline" style="width:100%;justify-content:center;margin-top:8px;">
+                                <i class="fas fa-plus"></i> Schedule Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    // Streak dots
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const streakDone = [true,true,true,true,true,false,false];
+    const today = 4; // Friday = index 4
+    document.getElementById('streakDots').innerHTML = days.map((d,i) => `
+        <div style="text-align:center;">
+            <div class="streak-dot ${i===today?'sd-active':i<today?'sd-done':'sd-empty'}">
+                ${i <= today ? '✓' : ''}
+            </div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:4px;font-weight:600;">${d}</div>
+        </div>
+    `).join('');
+
+    // Chart
+    const chartData = [
+        {day:'Mon',h:2},{day:'Tue',h:3.5},{day:'Wed',h:1.5},{day:'Thu',h:4},
+        {day:'Fri',h:3},{day:'Sat',h:0.5},{day:'Sun',h:2}
+    ];
+    const maxH = Math.max(...chartData.map(d=>d.h));
+    document.getElementById('actChart').innerHTML = chartData.map(d => `
+        <div class="chart-col">
+            <div style="font-size:11px;color:#94a3b8;font-weight:700;">${d.h}h</div>
+            <div class="chart-bar" style="height:${(d.h/maxH)*90}px;"></div>
+            <div class="chart-day">${d.day}</div>
+        </div>
+    `).join('');
+
+    // In Progress
+    const inProgress = [
+        { name:'Complete Web Dev Bootcamp', cat:'Technology', pct:68, img:'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=120&q=80' },
+        { name:'AI & Machine Learning Masterclass', cat:'Technology', pct:32, img:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=120&q=80' },
+        { name:'Business Leadership & Strategy', cat:'Business', pct:85, img:'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=120&q=80' },
+        { name:'Spanish for Beginners', cat:'Languages', pct:51, img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=120&q=80' },
+    ];
+    document.getElementById('inProgressGrid').innerHTML = inProgress.map(c => `
+        <div class="in-prog-card reveal">
+            <img class="prog-thumb" src="${c.img}" alt="">
+            <div class="prog-info">
+                <div class="prog-cat">${c.cat}</div>
+                <div class="prog-name" title="${c.name}">${c.name}</div>
+                <div class="progress-track" style="margin-top:6px;">
+                    <div class="progress-fill" style="width:${c.pct}%;"></div>
+                </div>
+                <div class="prog-pct">${c.pct}% complete</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Recommendations
+    const recs = [
+        { icon:'fa-chart-line', cls:'ri-pu', name:'Data Science with Python', meta:'56 hrs · Advanced' },
+        { icon:'fa-palette', cls:'ri-or', name:'UI/UX Design with Figma', meta:'24 hrs · Intermediate' },
+        { icon:'fa-language', cls:'ri-gr', name:'French for Beginners', meta:'30 hrs · Beginner' },
+        { icon:'fa-cloud', cls:'ri-pk', name:'AWS Cloud Practitioner', meta:'18 hrs · Beginner' },
+    ];
+    document.getElementById('recList').innerHTML = recs.map(r => `
+        <div class="rec-item">
+            <div class="rec-icon ${r.cls}"><i class="fas ${r.icon}"></i></div>
+            <div><div class="rec-name">${r.name}</div><div class="rec-meta">${r.meta}</div></div>
+            <i class="fas fa-chevron-right" style="color:#cbd5e1;font-size:12px;margin-left:auto;"></i>
+        </div>
+    `).join('');
+
+    // Achievements
+    const badges = [
+        { icon:'🏆', name:'First Course', date:'Jan 12' },
+        { icon:'🔥', name:'7-Day Streak', date:'Feb 2' },
+        { icon:'⚡', name:'Fast Learner', date:'Feb 15' },
+        { icon:'🎓', name:'Certified Pro', date:'Mar 1' },
+        { icon:'🌟', name:'Top Rated', date:'Mar 8' },
+        { icon:'🚀', name:'Upskilled', date:'Mar 14' },
+    ];
+    document.getElementById('badgeGrid').innerHTML = badges.map(b => `
+        <div class="ach-badge">
+            <div class="ach-icon">${b.icon}</div>
+            <div class="ach-name">${b.name}</div>
+            <div class="ach-date">${b.date}</div>
+        </div>
+    `).join('');
+
+    // Upcoming
+    const upcoming = [
+        { day:'17', mon:'MAR', name:'React Advanced Workshop', time:'3:00 PM – 5:00 PM' },
+        { day:'20', mon:'MAR', name:'Data Science Live Q&A', time:'11:00 AM – 12:00 PM' },
+        { day:'24', mon:'MAR', name:'Career Mentorship Call', time:'2:00 PM – 3:00 PM' },
+    ];
+    document.getElementById('upcomingList').innerHTML = upcoming.map(u => `
+        <div class="upcoming-item">
+            <div class="upcoming-date-box"><div class="ud-day">${u.day}</div><div class="ud-mon">${u.mon}</div></div>
+            <div><div class="upcoming-name">${u.name}</div><div class="upcoming-time"><i class="fas fa-clock" style="font-size:10px;margin-right:3px;color:var(--accent)"></i>${u.time}</div></div>
+        </div>
+    `).join('');
+
+    // Activity feed
+    const activities = [
+        { dot:'ad-green',  text:'Completed <strong>Module 3 – CSS Grid</strong> in Web Dev Bootcamp', time:'2h ago' },
+        { dot:'ad-blue',   text:'Enrolled in <strong>AI & Machine Learning Masterclass</strong>', time:'5h ago' },
+        { dot:'ad-amber',  text:'Achieved <strong>25-day streak</strong> milestone 🔥', time:'1d ago' },
+        { dot:'ad-purple', text:'Earned <strong>Fast Learner</strong> badge', time:'2d ago' },
+    ];
+    document.getElementById('activityList').innerHTML = activities.map(a => `
+        <div class="activity-item reveal">
+            <div class="act-dot ${a.dot}"></div>
+            <div class="act-text">${a.text}</div>
+            <div class="act-time">${a.time}</div>
+        </div>
+    `).join('');
+
+    // Reveal
+    setTimeout(() => document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible')), 80);
+    </script>
+    <!-- LiveChatAI Embed -->
+    <script src="https://app.livechatai.com/embed.js" data-id="cmfz1zexb0001la04iulo7jea" async defer></script>
+</body>
+</html>

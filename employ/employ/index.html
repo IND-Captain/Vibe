@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpactBridge &ndash; Technology for a Better World</title>
+  <meta name="description" content="ImpactBridge is a platform and website solving the world's most critical problems through technology and AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-bg: #ffffff;
+      --color-bg-soft: #fafafa;
+      --color-bg-muted: #f4f4f4;
+      --color-border: #e6e6e6;
+      --color-border-soft: #eeeeee;
+      --color-text: #000000;
+      --color-text-muted: #605f5f;
+      --color-text-subtle: #999999;
+      --color-accent: #00aaff;
+      --color-badge-bg: #e8f4ff;
+      --color-badge-text: #0060cc;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.10);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 32px;
+      --font-heading: 'Manrope', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--color-border);
+      border-radius: 100px;
+      padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 32px;
+      min-width: 680px;
+      box-shadow: var(--shadow-md);
+    }
+    .nav-logo {
+      font-family: var(--font-heading);
+      font-weight: 800; font-size: 16px;
+      letter-spacing: -0.04em;
+      color: var(--color-text);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav-logo span { color: var(--color-accent); }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links a {
+      font-size: 14px; font-weight: 500; letter-spacing: -0.03em;
+      color: var(--color-text-muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 100px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover { color: var(--color-text); background: var(--color-bg-muted); }
+    .nav-cta {
+      background: var(--color-text) !important;
+      color: #fff !important;
+      border-radius: 100px;
+      padding: 8px 18px !important;
+      font-weight: 600 !important;
+    }
+    .nav-cta:hover { opacity: 0.8; }
+
+    /* HERO — LEFT/RIGHT SPLIT */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center; justify-content: center;
+      padding-top: 120px; padding-bottom: 60px;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 30% 50%, rgba(0,170,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-split {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 48px;
+      width: 100%; max-width: 1200px;
+      padding: 0 80px;
+    }
+    .hero-left {
+      flex: 0 0 52%;
+      display: flex; flex-direction: column;
+      align-items: flex-start; gap: 28px;
+    }
+    .hero-right {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--color-badge-bg);
+      border: 1px solid rgba(0,96,204,0.2);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 13px; font-weight: 600;
+      color: var(--color-badge-text);
+      letter-spacing: -0.02em;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Hero text */
+    .hero h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(36px, 5.2vw, 66px);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 1.05;
+      color: var(--color-text);
+      text-align: left;
+    }
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, #00aaff, #006ee6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 17px; line-height: 1.65;
+      color: var(--color-text-muted);
+      max-width: 460px;
+      letter-spacing: -0.02em;
+      text-align: left;
+    }
+    .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--color-text); color: #fff;
+      padding: 14px 28px; border-radius: 100px;
+      font-weight: 600; font-size: 15px;
+      text-decoration: none; letter-spacing: -0.03em;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    .btn-primary:hover { opacity: 0.82; transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent; color: var(--color-text);
+      padding: 14px 28px; border-radius: 100px;
+      border: 1.5px solid var(--color-border);
+      font-weight: 600; font-size: 15px;
+      text-decoration: none; letter-spacing: -0.03em;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .btn-secondary:hover { border-color: #999; transform: translateY(-1px); }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex; align-items: center; gap: 36px;
+      padding: 14px 0 0;
+      border-top: 1px solid var(--color-border-soft);
+    }
+    .stat-item { display: flex; align-items: center; gap: 8px; }
+    .stat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent); }
+    .stat-label { font-size: 13px; font-weight: 500; color: var(--color-text-muted); }
+    .stat-num { font-family: var(--font-heading); font-size: 13px; font-weight: 700; }
+
+    /* ==============================
+       TYPING GIRL ANIMATION (CSS)
+    ============================== */
+    .typing-scene {
+      width: 400px; height: 340px;
+      position: relative;
+    }
+
+    /* desk */
+    .desk {
+      position: absolute;
+      height: 14px; background: #e2e2e2;
+      border-radius: 8px 8px 4px 4px;
+    }
+
+    /* floating particles */
+    .float-dot {
+      position: absolute;
+      border-radius: 50%; opacity: 0;
+      animation: floatUp 3.2s ease-in-out infinite;
+    }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+      30%  { opacity: 0.7; }
+      100% { opacity: 0; transform: translateY(-90px) scale(1.1); }
+    }
+
+    /* person wrapper */
+    .girl { position: absolute; display: flex; flex-direction: column; align-items: center; }
+    .girl-1 { left: 20px; bottom: 44px; }
+    .girl-2 { right: 20px; bottom: 44px; }
+
+    /* person body bounces gently */
+    .person {
+      display: flex; flex-direction: column; align-items: center;
+      animation: bob 1.9s ease-in-out infinite;
+    }
+    .girl-2 .person { animation-delay: 0.5s; animation-duration: 2.1s; }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-4px); }
+    }
+
+    /* head */
+    .person-head {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      position: relative;
+      margin-bottom: 1px;
+    }
+    .person-face {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; line-height: 1;
+    }
+    /* hair styles */
+    .hair-long::before {
+      content: ''; position: absolute;
+      width: 46px; height: 28px; background: #3d2b1f;
+      border-radius: 23px 23px 0 0; top: -5px; left: -2px; z-index: -1;
+    }
+    .hair-long::after {
+      content: ''; position: absolute;
+      width: 13px; height: 40px; background: #3d2b1f;
+      border-radius: 0 0 7px 7px; bottom: -28px; left: -9px; z-index: -1;
+    }
+    .hair-bun::before {
+      content: ''; position: absolute;
+      width: 46px; height: 25px; background: #5c3d2e;
+      border-radius: 23px 23px 0 0; top: -5px; left: -2px; z-index: -1;
+    }
+    .hair-bun::after {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; background: #5c3d2e;
+      border-radius: 50%; top: -14px; right: 0px; z-index: -1;
+    }
+
+    /* torso */
+    .person-body {
+      width: 56px; height: 58px;
+      border-radius: 12px 12px 4px 4px;
+      position: relative;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+
+    /* arms that type */
+    .arms {
+      position: absolute; bottom: 5px;
+      width: 72px; height: 26px;
+      display: flex; justify-content: space-between;
+    }
+    .arm { width: 30px; height: 14px; border-radius: 9px; transform-origin: top center; }
+    .arm-l { animation: typeL 0.38s ease-in-out infinite alternate; }
+    .arm-r { animation: typeR 0.38s ease-in-out infinite alternate 0.19s; }
+    @keyframes typeL {
+      0%   { transform: rotate(-14deg) translateY(0); }
+      100% { transform: rotate(-3deg) translateY(-5px); }
+    }
+    @keyframes typeR {
+      0%   { transform: rotate(14deg) translateY(-5px); }
+      100% { transform: rotate(3deg) translateY(0); }
+    }
+
+    /* laptop */
+    .laptop { display: flex; flex-direction: column; align-items: center; margin-top: -10px; }
+    .laptop-screen {
+      width: 106px; height: 70px; background: #12122a;
+      border-radius: 7px 7px 0 0; border: 3px solid #c8c8c8;
+      overflow: hidden; display: flex; flex-direction: column;
+      gap: 5px; padding: 9px 8px;
+    }
+    .laptop-base { width: 116px; height: 8px; background: #d4d4d4; border-radius: 0 0 7px 7px; }
+    .screen-line { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.12); }
+    .screen-line.active { background: rgba(0,170,255,0.65); }
+    .screen-cursor {
+      display: inline-block; width: 2px; height: 9px;
+      background: #00aaff; border-radius: 1px;
+      animation: blink 0.85s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .hero-right { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+    /* SECTION SHARED */
+    section {
+      width: 100%; padding: 80px 0;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .container { width: 100%; max-width: 1200px; padding: 0 80px; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--color-bg-muted);
+      border: 1px solid var(--color-border);
+      border-radius: 100px;
+      padding: 5px 13px;
+      font-size: 12px; font-weight: 600;
+      color: var(--color-text-muted);
+      letter-spacing: 0.02em; text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 700; letter-spacing: -0.05em;
+      line-height: 1.2; color: var(--color-text);
+    }
+    .section-sub {
+      font-size: 17px; line-height: 1.6;
+      color: var(--color-text-muted); max-width: 520px;
+      letter-spacing: -0.02em;
+    }
+
+    /* PROBLEM SECTION */
+    .problem-section { background: var(--color-bg); }
+    .problem-layout { display: flex; gap: 64px; align-items: flex-start; }
+    .problem-left { flex: 0 0 35%; position: sticky; top: 160px; }
+    .problem-right { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+    .problem-card {
+      background: var(--color-bg-soft);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-soft);
+      padding: 32px;
+      display: flex; flex-direction: column; gap: 16px;
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .problem-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .problem-card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .problem-card-header { display: flex; align-items: center; gap: 16px; }
+    .problem-card-title { font-family: var(--font-heading); font-size: 20px; font-weight: 700; letter-spacing: -0.04em; }
+    .problem-card-stat { font-size: 13px; font-weight: 600; color: var(--color-text-muted); }
+    .problem-card-body { font-size: 15px; line-height: 1.65; color: var(--color-text-muted); }
+    .problem-card-tag {
+      display: inline-flex; border-radius: 100px;
+      padding: 4px 12px; font-size: 12px; font-weight: 600; width: fit-content;
+    }
+    .tag-blue { background: #e8f4ff; color: #0060cc; }
+    .tag-green { background: #e8ffe8; color: #1a7a1a; }
+    .tag-red { background: #ffe8e8; color: #c40000; }
+    .tag-purple { background: #f4e8ff; color: #7a1a9a; }
+    .tag-orange { background: #fff4e0; color: #a06000; }
+    .tag-teal { background: #e0f7f7; color: #006060; }
+    .icon-blue { background: #e8f4ff; }
+    .icon-green { background: #e8ffe8; }
+    .icon-red { background: #ffe8e8; }
+    .icon-purple { background: #f4e8ff; }
+    .icon-orange { background: #fff4e0; }
+    .icon-teal { background: #e0f7f7; }
+
+    /* DOMAINS SECTION */
+    .domains-section { background: var(--color-bg-soft); }
+    .domains-header { text-align: center; max-width: 680px; margin: 0 auto 64px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .domains-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .domain-card {
+      position: relative;
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      border: 2px solid #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 40px 36px;
+      display: flex; flex-direction: column; gap: 20px;
+      overflow: hidden;
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .domain-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .domain-card-num {
+      position: absolute; top: 24px; right: 28px;
+      font-family: var(--font-heading); font-size: 64px; font-weight: 800;
+      opacity: 0.05; line-height: 1; letter-spacing: -0.05em;
+    }
+    .domain-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+    .domain-title { font-family: var(--font-heading); font-size: 26px; font-weight: 700; letter-spacing: -0.04em; }
+    .domain-desc { font-size: 15px; line-height: 1.65; color: var(--color-text-muted); }
+    .domain-features { display: flex; flex-direction: column; gap: 10px; }
+    .domain-feature { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--color-text-muted); }
+    .feature-check { width: 20px; height: 20px; border-radius: 50%; background: var(--color-bg-muted); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+
+    /* HOW IT WORKS */
+    .how-section { background: var(--color-bg); }
+    .how-header { text-align: center; max-width: 620px; margin: 0 auto 64px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .step-card {
+      background: var(--color-bg-soft);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-soft);
+      padding: 36px 28px;
+      display: flex; flex-direction: column; gap: 20px;
+      transition: box-shadow 0.25s;
+    }
+    .step-card:hover { box-shadow: var(--shadow-md); }
+    .step-num { font-family: var(--font-heading); font-weight: 800; font-size: 13px; color: #fff; background: var(--color-text); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .step-title { font-family: var(--font-heading); font-size: 20px; font-weight: 700; letter-spacing: -0.04em; }
+    .step-desc { font-size: 14px; line-height: 1.65; color: var(--color-text-muted); }
+
+    /* SDG SECTION */
+    .sdg-section { background: var(--color-bg-soft); }
+    .sdg-header { text-align: center; max-width: 680px; margin: 0 auto 56px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .sdg-row { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+    .sdg-pill {
+      display: flex; align-items: center; gap: 10px;
+      border-radius: 100px; padding: 10px 20px 10px 12px;
+      font-size: 14px; font-weight: 600;
+      border: 1.5px solid; transition: transform 0.2s;
+    }
+    .sdg-pill:hover { transform: translateY(-2px); }
+    .sdg-icon { font-size: 20px; }
+
+    /* CTA */
+    .cta-section { background: var(--color-bg); padding: 80px 0 120px; }
+    .cta-card {
+      background: var(--color-text); border-radius: var(--radius-xl);
+      padding: 80px;
+      display: flex; flex-direction: column; align-items: center; gap: 32px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute; width: 500px; height: 300px;
+      background: radial-gradient(ellipse, rgba(0,170,255,0.2), transparent 70%);
+      top: -50px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .cta-card h2 { font-family: var(--font-heading); font-size: clamp(32px,5vw,60px); font-weight: 800; letter-spacing: -0.05em; color: #fff; line-height: 1.05; position: relative; }
+    .cta-card p { font-size: 18px; line-height: 1.5; color: rgba(255,255,255,0.6); max-width: 480px; position: relative; }
+    .btn-white {
+      background: #fff; color: var(--color-text);
+      padding: 16px 36px; border-radius: 100px;
+      font-weight: 700; font-size: 16px;
+      text-decoration: none; letter-spacing: -0.03em;
+      transition: opacity 0.2s, transform 0.2s; position: relative;
+    }
+    .btn-white:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* FOOTER */
+    footer { background: var(--color-bg-soft); border-top: 1px solid var(--color-border-soft); padding: 60px 80px 40px; }
+    .footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-bottom: 48px; flex-wrap: wrap; }
+    .footer-brand { max-width: 320px; }
+    .footer-logo { font-family: var(--font-heading); font-weight: 800; font-size: 20px; letter-spacing: -0.05em; color: var(--color-text); margin-bottom: 12px; }
+    .footer-logo span { color: var(--color-accent); }
+    .footer-tagline { font-size: 14px; color: var(--color-text-muted); line-height: 1.5; }
+    .footer-links-group { display: flex; gap: 64px; flex-wrap: wrap; }
+    .footer-col h4 { font-family: var(--font-heading); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text); margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: var(--color-text-muted); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--color-text); }
+    .footer-bottom { border-top: 1px solid var(--color-border-soft); padding-top: 24px; display: flex; justify-content: space-between; font-size: 13px; color: var(--color-text-subtle); flex-wrap: wrap; gap: 12px; }
+
+    /* ANIMATIONS */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    [data-delay="1"] { transition-delay: 0.1s; }
+    [data-delay="2"] { transition-delay: 0.2s; }
+    [data-delay="3"] { transition-delay: 0.3s; }
+    [data-delay="4"] { transition-delay: 0.4s; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { min-width: unset; width: calc(100% - 40px); gap: 16px; }
+      .nav-links { display: none; }
+      .container { padding: 0 24px; }
+      section { padding: 64px 0; }
+      .hero-split { flex-direction: column; padding: 0 24px; }
+      .hero-left { align-items: center; }
+      .hero h1, .hero-sub { text-align: center; }
+      .hero-actions { justify-content: center; }
+      .stats-bar { justify-content: center; flex-wrap: wrap; gap: 20px; }
+      .typing-scene { width: 300px; height: 260px; }
+      .problem-layout { flex-direction: column; }
+      .problem-left { position: relative; top: unset; }
+      .domains-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .cta-card { padding: 48px 28px; }
+      footer { padding: 48px 24px 32px; }
+      .footer-top { flex-direction: column; }
+      .footer-bottom { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Impact<span>Bridge</span></a>
+    <div class="nav-links">
+      <a href="#problems">Problems</a>
+      <a href="health.html">Health</a>
+      <a href="education.html">Education</a>
+      <a href="#domains">Domains</a>
+      <a href="#how">How It Works</a>
+      <a href="#goals">Goals</a>
+      <a href="#contact" class="nav-cta">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- HERO — Left / Right Split -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-split">
+
+      <!-- LEFT TEXT -->
+      <div class="hero-left">
+        <div class="badge">
+          <div class="badge-dot"></div>
+          Solving Global Challenges with Technology
+        </div>
+        <h1>
+          Building a World<br />
+          with <span class="highlight">No Poverty,</span><br />
+          No Hunger.
+        </h1>
+        <p class="hero-sub">
+          ImpactBridge uses AI and web technology to tackle the world's most critical issues — from extreme poverty to lack of quality education — through 4 focused impact domains.
+        </p>
+        <div class="hero-actions">
+          <a href="#domains" class="btn-primary">Explore Our Domains &rarr;</a>
+          <a href="#problems" class="btn-secondary">See the Problem</a>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-dot"></div>
+            <span class="stat-num">800M+</span>
+            <span class="stat-label">in extreme poverty</span>
+          </div>
+          <div class="stat-item">
+            <div class="stat-dot" style="background:#22c55e;"></div>
+            <span class="stat-num">735M</span>
+            <span class="stat-label">chronically hungry</span>
+          </div>
+          <div class="stat-item">
+            <div class="stat-dot" style="background:#a855f7;"></div>
+            <span class="stat-num">4 Domains</span>
+            <span class="stat-label">of impact</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: CSS ANIMATED TYPING GIRLS -->
+      <div class="hero-right">
+        <div class="typing-scene" aria-label="Two people working on laptops">
+          <!-- Desk surface -->
+          <div class="desk" style="bottom:44px; width:360px; left:10px;"></div>
+
+          <!-- Floating color particles -->
+          <div class="float-dot" style="width:8px;height:8px;background:#00aaff;left:75px;bottom:195px;animation-delay:0s;"></div>
+          <div class="float-dot" style="width:5px;height:5px;background:#a855f7;left:175px;bottom:185px;animation-delay:1.4s;"></div>
+          <div class="float-dot" style="width:7px;height:7px;background:#22c55e;left:265px;bottom:205px;animation-delay:0.7s;"></div>
+          <div class="float-dot" style="width:4px;height:4px;background:#f59e0b;right:45px;bottom:200px;animation-delay:2.1s;"></div>
+          <div class="float-dot" style="width:5px;height:5px;background:#ec4899;left:130px;bottom:220px;animation-delay:1.8s;"></div>
+
+          <!-- GIRL 1 — long hair, blue outfit -->
+          <div class="girl girl-1">
+            <div class="person">
+              <div class="person-head">
+                <div class="hair-long"></div>
+                <div class="person-face">&#x1F642;</div>
+              </div>
+              <div class="person-body" style="background:#dbeafe;">
+                <div class="arms">
+                  <div class="arm arm-l" style="background:#93c5fd;"></div>
+                  <div class="arm arm-r" style="background:#93c5fd;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="laptop">
+              <div class="laptop-screen">
+                <div class="screen-line active" style="width:68%;"></div>
+                <div class="screen-line" style="width:50%;"></div>
+                <div class="screen-line" style="width:78%;"></div>
+                <div style="display:flex;align-items:center;gap:2px;margin-top:1px;">
+                  <div class="screen-line" style="width:38%;margin:0;"></div>
+                  <span class="screen-cursor"></span>
+                </div>
+              </div>
+              <div class="laptop-base"></div>
+            </div>
+          </div>
+
+          <!-- GIRL 2 — bun hair, pink outfit -->
+          <div class="girl girl-2">
+            <div class="person">
+              <div class="person-head">
+                <div class="hair-bun"></div>
+                <div class="person-face">&#x1F60A;</div>
+              </div>
+              <div class="person-body" style="background:#fce7f3;">
+                <div class="arms">
+                  <div class="arm arm-l" style="background:#f9a8d4;animation-delay:0.12s;"></div>
+                  <div class="arm arm-r" style="background:#f9a8d4;animation-delay:0.31s;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="laptop">
+              <div class="laptop-screen">
+                <div class="screen-line" style="width:58%;"></div>
+                <div class="screen-line active" style="width:82%;"></div>
+                <div class="screen-line" style="width:44%;"></div>
+                <div style="display:flex;align-items:center;gap:2px;margin-top:1px;">
+                  <div class="screen-line" style="width:54%;margin:0;"></div>
+                  <span class="screen-cursor" style="animation-delay:0.42s;"></span>
+                </div>
+              </div>
+              <div class="laptop-base"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEM STATEMENT SECTION -->
+  <section id="problems" class="problem-section">
+    <div class="container">
+      <div class="problem-layout">
+        <div class="problem-left fade-in">
+          <div class="section-label">The Problem</div>
+          <h2 class="section-title">Critical global challenges we are solving</h2>
+          <p class="section-sub" style="margin-top: 20px;">
+            Billions of people face preventable suffering every day. We identified 6 interconnected global crises — and built technology to address them.
+          </p>
+        </div>
+        <div class="problem-right">
+
+          <div class="problem-card fade-in" data-delay="1">
+            <div class="problem-card-header">
+              <div class="problem-card-icon icon-red">&#x1F3DA;&#xFE0F;</div>
+              <div>
+                <div class="problem-card-title">No Poverty</div>
+                <div class="problem-card-stat">800 Million people affected</div>
+              </div>
+            </div>
+            <p class="problem-card-body">Over 800 million people still live in extreme poverty, struggling daily to meet basic needs like food, health care, and clean water. Poverty traps communities in cycles of hardship across generations.</p>
+            <div class="problem-card-tag tag-red">SDG Goal 1</div>
+          </div>
+
+          <div class="problem-card fade-in" data-delay="2">
+            <div class="problem-card-header">
+              <div class="problem-card-icon icon-orange">&#x1F33E;</div>
+              <div>
+                <div class="problem-card-title">Zero Hunger</div>
+                <div class="problem-card-stat">735 Million chronically hungry</div>
+              </div>
+            </div>
+            <p class="problem-card-body">Chronic hunger affects approximately 735 million people globally, driven by food system inefficiencies, conflict, and climate disruptions. Wasteful supply chains leave billions without nutritional security.</p>
+            <div class="problem-card-tag tag-orange">SDG Goal 2</div>
+          </div>
+
+          <div class="problem-card fade-in" data-delay="3">
+            <div class="problem-card-header">
+              <div class="problem-card-icon icon-green">&#x2764;&#xFE0F;</div>
+              <div>
+                <div class="problem-card-title">Good Health &amp; Well-being</div>
+                <div class="problem-card-stat">Preventable deaths daily</div>
+              </div>
+            </div>
+            <p class="problem-card-body">High maternal mortality rates and lack of universal health coverage continue to cause preventable deaths worldwide, especially in low-income and conflict-affected regions.</p>
+            <div class="problem-card-tag tag-green">SDG Goal 3</div>
+          </div>
+
+          <div class="problem-card fade-in" data-delay="1">
+            <div class="problem-card-header">
+              <div class="problem-card-icon icon-blue">&#x1F4DA;</div>
+              <div>
+                <div class="problem-card-title">Quality Education</div>
+                <div class="problem-card-stat">Millions lack access</div>
+              </div>
+            </div>
+            <p class="problem-card-body">Millions of children lack access to equitable education, often due to high dropout rates, language barriers, infrastructure gaps, and economic pressure on families.</p>
+            <div class="problem-card-tag tag-blue">SDG Goal 4</div>
+          </div>
+
+          <div class="problem-card fade-in" data-delay="2">
+            <div class="problem-card-header">
+              <div class="problem-card-icon icon-teal">&#x26A1;</div>
+              <div>
+                <div class="problem-card-title">Affordable &amp; Clean Energy</div>
+                <div class="problem-card-stat">Billions without modern energy</div>
+              </div>
+            </div>
+            <p class="problem-card-body">Billions of people still lack access to modern, sustainable energy, relying instead on polluting fuels that harm health and limit economic opportunity.</p>
+            <div class="problem-card-tag tag-teal">SDG Goal 7</div>
+          </div>
+
+          <div class="problem-card fade-in" data-delay="3">
+            <div class="problem-card-header">
+              <div class="problem-card-icon icon-purple">&#x1F4BC;</div>
+              <div>
+                <div class="problem-card-title">Decent Work &amp; Economic Growth</div>
+                <div class="problem-card-stat">Persistent informal employment</div>
+              </div>
+            </div>
+            <p class="problem-card-body">Slow global GDP growth and persistent informal employment hinder the creation of quality jobs. Millions lack fair wages, job security, and access to economic opportunity.</p>
+            <div class="problem-card-tag tag-purple">SDG Goal 8</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOMAINS SECTION -->
+  <section id="domains" class="domains-section">
+    <div class="container">
+      <div class="domains-header fade-in">
+        <div class="section-label">Our 4 Domains</div>
+        <h2 class="section-title">One platform, four pillars of impact</h2>
+        <p class="section-sub">Our application and website address these global crises through four focused, technology-driven domains.</p>
+      </div>
+      <div class="domains-grid">
+
+        <a href="education.html" style="text-decoration:none; color:inherit; display:block;">
+          <div class="domain-card fade-in" data-delay="1">
+            <div class="domain-card-num">01</div>
+            <div class="domain-icon icon-blue" style="font-size:32px;">&#x1F4DA;</div>
+            <div>
+              <div class="domain-title">Education</div>
+              <p class="domain-desc">Our education platform uses AI to break language barriers, personalize learning pathways, and reduce dropout rates — delivering quality education to underserved communities.</p>
+            </div>
+            <div class="domain-features">
+              <div class="domain-feature"><div class="feature-check">&#x2713;</div>AI-personalized learning paths</div>
+              <div class="domain-feature"><div class="feature-check">&#x2713;</div>Multilingual content delivery</div>
+              <div class="domain-feature"><div class="feature-check">&#x2713;</div>Dropout risk prediction &amp; alerts</div>
+            </div>
+          </div>
+        </a>
+
+        <a href="health.html" style="text-decoration:none; color:inherit; display:block;">
+          <div class="domain-card fade-in" data-delay="2">
+            <div class="domain-card-num">02</div>
+            <div class="domain-icon icon-red" style="font-size:32px;">&#x2764;&#xFE0F;</div>
+            <div>
+              <div class="domain-title">Health</div>
+              <p class="domain-desc">Connecting underserved communities to health resources through AI-driven symptom assessment, telemedicine referrals, and maternal health tracking tools.</p>
+            </div>
+            <div class="domain-features">
+              <div class="domain-feature"><div class="feature-check">&#x2713;</div>AI symptom checker &amp; triage</div>
+              <div class="domain-feature"><div class="feature-check">&#x2713;</div>Maternal health monitoring</div>
+              <div class="domain-feature"><div class="feature-check">&#x2713;</div>Universal health coverage bridge</div>
+            </div>
+          </div>
+        </a>
+
+        <div class="domain-card fade-in" data-delay="3">
+          <div class="domain-card-num">03</div>
+          <div class="domain-icon icon-orange" style="font-size:32px;">&#x1F371;</div>
+          <div>
+            <div class="domain-title">Food &amp; Hunger</div>
+            <p class="domain-desc">Mapping food deserts, reducing waste through predictive logistics, and connecting surplus food to communities facing chronic hunger — ending food insecurity through data.</p>
+          </div>
+          <div class="domain-features">
+            <div class="domain-feature"><div class="feature-check">&#x2713;</div>Food desert mapping &amp; alerts</div>
+            <div class="domain-feature"><div class="feature-check">&#x2713;</div>Supply chain waste reduction AI</div>
+            <div class="domain-feature"><div class="feature-check">&#x2713;</div>Surplus food redistribution network</div>
+          </div>
+        </div>
+
+        <div class="domain-card fade-in" data-delay="4">
+          <div class="domain-card-num">04</div>
+          <div class="domain-icon icon-purple" style="font-size:32px;">&#x1F4BC;</div>
+          <div>
+            <div class="domain-title">Work &amp; Economic Growth</div>
+            <p class="domain-desc">Bridging the skills gap with AI-powered job matching, vocational training, and micro-enterprise support — creating pathways from informal to formal employment.</p>
+          </div>
+          <div class="domain-features">
+            <div class="domain-feature"><div class="feature-check">&#x2713;</div>AI job matching &amp; skill assessment</div>
+            <div class="domain-feature"><div class="feature-check">&#x2713;</div>Vocational training integration</div>
+            <div class="domain-feature"><div class="feature-check">&#x2713;</div>Micro-enterprise growth tools</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="how-section">
+    <div class="container">
+      <div class="how-header fade-in">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">From data to real-world impact</h2>
+        <p class="section-sub">Our platform collects, analyzes, and acts on data from communities to drive measurable improvements across all four domains.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card fade-in" data-delay="1">
+          <div class="step-num">01</div>
+          <div class="step-title">Identify Communities in Need</div>
+          <p class="step-desc">We use geospatial data, census statistics, and community surveys to pinpoint regions with the highest need across education, food, health, and employment.</p>
+        </div>
+        <div class="step-card fade-in" data-delay="2">
+          <div class="step-num">02</div>
+          <div class="step-title">Deploy AI-powered Tools</div>
+          <p class="step-desc">Our domain-specific AI tools are deployed directly to users via mobile-first web applications — accessible even on low-bandwidth connections.</p>
+        </div>
+        <div class="step-card fade-in" data-delay="3">
+          <div class="step-num">03</div>
+          <div class="step-title">Measure &amp; Amplify Impact</div>
+          <p class="step-desc">We continuously track outcomes across all four domains and surface insights to NGO partners, governments, and communities to amplify what works.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SDG GOALS -->
+  <section id="goals" class="sdg-section">
+    <div class="container">
+      <div class="sdg-header fade-in">
+        <div class="section-label">UN Sustainable Development Goals</div>
+        <h2 class="section-title">Aligned with global frameworks</h2>
+        <p class="section-sub">Every feature we build maps directly to the United Nations' Sustainable Development Goals — ensuring our work creates systemic, lasting change.</p>
+      </div>
+      <div class="sdg-row">
+        <div class="sdg-pill fade-in" style="background:#ffe8e8;border-color:#f9a8a8;color:#c40000;" data-delay="1"><span class="sdg-icon">&#x1F3DA;</span> SDG 1 &ndash; No Poverty</div>
+        <div class="sdg-pill fade-in" style="background:#fff4e0;border-color:#fcd28a;color:#a06000;" data-delay="1"><span class="sdg-icon">&#x1F33E;</span> SDG 2 &ndash; Zero Hunger</div>
+        <div class="sdg-pill fade-in" style="background:#e8ffe8;border-color:#86efac;color:#1a7a1a;" data-delay="2"><span class="sdg-icon">&#x2764;&#xFE0F;</span> SDG 3 &ndash; Good Health</div>
+        <div class="sdg-pill fade-in" style="background:#e8f4ff;border-color:#93c5fd;color:#0060cc;" data-delay="2"><span class="sdg-icon">&#x1F4DA;</span> SDG 4 &ndash; Quality Education</div>
+        <div class="sdg-pill fade-in" style="background:#e0f7f7;border-color:#5eead4;color:#006060;" data-delay="3"><span class="sdg-icon">&#x26A1;</span> SDG 7 &ndash; Clean Energy</div>
+        <div class="sdg-pill fade-in" style="background:#f4e8ff;border-color:#c4b5fd;color:#7a1a9a;" data-delay="3"><span class="sdg-icon">&#x1F4BC;</span> SDG 8 &ndash; Decent Work</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contact" class="cta-section">
+    <div class="container">
+      <div class="cta-card fade-in">
+        <div class="cta-glow"></div>
+        <h2>Join Us in Building<br />a Better World</h2>
+        <p>Whether you're a community partner, NGO, government body, or individual — ImpactBridge gives you the tools to create real, measurable change.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;">
+          <a href="#domains" class="btn-white">Explore the Platform</a>
+          <a href="mailto:contact@impactbridge.org" style="display:inline-flex;align-items:center;padding:16px 36px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.8);font-size:16px;font-weight:600;text-decoration:none;letter-spacing:-0.03em;">Contact Us &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">Impact<span>Bridge</span></div>
+        <p class="footer-tagline">A technology platform dedicated to solving global challenges in Education, Health, Food &amp; Hunger, and Work — through AI and data-driven insights.</p>
+      </div>
+      <div class="footer-links-group">
+        <div class="footer-col">
+          <h4>Domains</h4>
+          <a href="education.html">Education</a>
+          <a href="health.html">Health</a>
+          <a href="#">Food &amp; Hunger</a>
+          <a href="#">Work &amp; Growth</a>
+        </div>
+        <div class="footer-col">
+          <h4>SDG Goals</h4>
+          <a href="#">No Poverty</a>
+          <a href="#">Zero Hunger</a>
+          <a href="#">Good Health</a>
+          <a href="#">Quality Education</a>
+          <a href="#">Clean Energy</a>
+          <a href="#">Decent Work</a>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <a href="#">How It Works</a>
+          <a href="#">Impact Reports</a>
+          <a href="#">Partner With Us</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 ImpactBridge. Built to solve real problems.</span>
+      <span>Aligned with UN Sustainable Development Goals</span>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+    <!-- LiveChatAI Embed -->
+    <script src="https://app.livechatai.com/embed.js" data-id="cmfz1zexb0001la04iulo7jea" async defer></script>
+</body>
+</html>

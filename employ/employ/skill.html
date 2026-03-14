@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Training & Programs – EduSmart</title>
+    <meta name="description" content="Explore professional skill training programs across tech, design, data, and business.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 22px;
+        }
+        .program-card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+        }
+        .program-card:hover { transform: translateY(-5px); box-shadow: 0 14px 28px rgba(0,0,0,0.09); border-color: var(--accent); }
+        .prog-header { padding: 18px; border-bottom: 1px solid var(--card-border); display: flex; align-items: flex-start; gap: 14px; }
+        .prog-icon { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; flex-shrink: 0; }
+        .pi-orange { background: linear-gradient(135deg,#f97316,#ea580c); }
+        .pi-blue   { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+        .pi-pink   { background: linear-gradient(135deg,#ec4899,#db2777); }
+        .pi-purple { background: linear-gradient(135deg,#8b5cf6,#7c3aed); }
+        .pi-green  { background: linear-gradient(135deg,#10b981,#059669); }
+        .pi-teal   { background: linear-gradient(135deg,#14b8a6,#0d9488); }
+        .prog-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 3px; line-height: 1.3; }
+        .prog-provider { font-size: 12px; color: #64748b; }
+        .prog-body { padding: 16px 18px; }
+        .prog-desc { font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 14px; }
+        .prog-meta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        .prog-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; }
+        .prog-meta i { color: var(--accent); width: 14px; text-align: center; }
+        .prog-meta strong { color: #1e293b; font-weight: 600; }
+        .prog-footer { padding: 14px 18px; border-top: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .skill-badge { padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+        .sb-beg { background: rgba(34,197,94,0.1); color: #16a34a; }
+        .sb-int { background: rgba(245,158,11,0.1); color: #d97706; }
+        .sb-adv { background: rgba(239,68,68,0.1); color: #dc2626; }
+        .prog-btns { display: flex; gap: 8px; }
+        .btn-sm-out { padding: 7px 14px; background: transparent; border: 1.5px solid var(--card-border); border-radius: 10px; font-size: 12px; font-weight: 500; cursor: pointer; color: #64748b; transition: all 0.2s; font-family: inherit; }
+        .btn-sm-out:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-sm-pri { padding: 7px 14px; background: var(--accent); border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: white; transition: all 0.2s; font-family: inherit; }
+        .btn-sm-pri:hover { background: var(--accent-secondary); }
+
+        /* Practice Cards */
+        .practice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .practice-card { background: #ffffff; border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .practice-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); border-color: var(--accent); }
+        .prac-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; }
+        .prac-orange { background:rgba(249,115,22,.12); color:#f97316; }
+        .prac-pink   { background:rgba(236,72,153,.12); color:#ec4899; }
+        .prac-blue   { background:rgba(59,130,246,.12);  color:#3b82f6; }
+        .prac-purple { background:rgba(139,92,246,.12); color:#8b5cf6; }
+        .prac-title { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+        .prac-desc  { font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 12px; }
+        .diff-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; margin-bottom: 14px; }
+        .diff-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dd-easy   { background:#22c55e; }
+        .dd-med    { background:#f59e0b; }
+        .dd-hard   { background:#ef4444; }
+        .feat-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+        .feat-tag { padding: 3px 9px; background: #f8fafc; border: 1px solid var(--card-border); border-radius: 6px; font-size: 11px; color: #64748b; }
+
+        /* Assessment */
+        .assessment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        .assess-card { background: #fff; border: 1px solid var(--card-border); border-radius: 20px; padding: 26px; text-align: center; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .assess-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
+        .assess-level { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .assess-meta { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; }
+        .am-val { font-size: 22px; font-weight: 800; color: #1e293b; }
+        .am-lbl { font-size: 11px; color: #64748b; }
+        .assess-cat { font-size: 12px; color: #64748b; margin-bottom: 16px; }
+
+        /* Cert Banner */
+        .cert-hero {
+            background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(129,140,248,0.08));
+            border: 1px solid rgba(99,102,241,0.18);
+            border-radius: 24px;
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 28px;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .cert-title { font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+        .cert-desc { color: #64748b; margin-bottom: 20px; line-height: 1.6; max-width: 500px; }
+        .cert-box { background: rgba(99,102,241,0.08); border: 2px dashed var(--accent); border-radius: 18px; padding: 28px 36px; text-align: center; min-width: 180px; }
+        .cert-icon { font-size: 48px; color: var(--accent); margin-bottom: 10px; }
+        .cert-box-title { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+        .cert-box-sub { font-size: 12px; color: #64748b; }
+
+        /* Subscribe */
+        .sub-banner { background: linear-gradient(135deg,rgba(99,102,241,.06),rgba(129,140,248,.06)); border:1px solid rgba(99,102,241,.2); border-radius:20px; padding:28px; display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:32px; flex-wrap:wrap; }
+        .sub-title { font-size:17px; font-weight:700; color:#1e293b; margin-bottom:4px; }
+        .sub-desc { font-size:13px; color:#64748b; }
+        .sub-form { display:flex; gap:10px; }
+        .sub-input { padding:11px 16px; background:#fff; border:1px solid var(--card-border); border-radius:12px; font-size:14px; color:#1e293b; width:220px; font-family:inherit; }
+        .sub-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <a href="index.html" class="sidebar-logo" style="text-decoration: none; color: inherit;">
+                <div class="sidebar-logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                <div>
+                    <div class="sidebar-logo-text">EduSmart</div>
+                    <div class="sidebar-logo-sub">Learning Platform</div>
+                </div>
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="edu-dashboard.html" class="nav-link"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="course.html" class="nav-link"><i class="fas fa-book-open"></i><span>Courses</span><span class="nav-badge">12</span></a></li>
+                <li class="nav-item"><a href="skill.html" class="nav-link active"><i class="fas fa-tools"></i><span>Skill Training</span></a></li>
+                <li class="nav-item"><a href="education.html" class="nav-link"><i class="fas fa-robot"></i><span>AI Learning Assistant</span></a></li>
+                <li class="nav-item"><a href="aicarrer.html" class="nav-link"><i class="fas fa-compass"></i><span>AI Career Advisor</span></a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user"></i><span>Account</span></a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+                    <h1 class="page-header-title"><i class="fas fa-tools"></i> Skill Training & Programs</h1>
+                </div>
+                <div class="header-actions">
+                    <div class="user-profile-pill">
+                        <div class="user-avatar">JS</div>
+                        <div><div class="user-name-text">John Smith</div><div class="user-role-text">Student</div></div>
+                    </div>
+                    <button class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-rocket"></i></div><div><div class="stat-value">8</div><div class="stat-label">Active Programs</div></div></div>
+                    <div class="stat-card"><div class="stat-icon green"><i class="fas fa-trophy"></i></div><div><div class="stat-value">12</div><div class="stat-label">Skills Mastered</div></div></div>
+                    <div class="stat-card"><div class="stat-icon amber"><i class="fas fa-fire"></i></div><div><div class="stat-value">28</div><div class="stat-label">Day Streak</div></div></div>
+                    <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-medal"></i></div><div><div class="stat-value">3</div><div class="stat-label">Certifications</div></div></div>
+                </div>
+
+                <!-- Cert Banner -->
+                <div class="cert-hero reveal">
+                    <div>
+                        <div class="cert-title">🎓 Earn Industry Certifications</div>
+                        <div class="cert-desc">Complete skill training programs and earn globally recognized certifications that boost your career and LinkedIn profile.</div>
+                        <button class="btn-primary"><i class="fas fa-star"></i> Explore Certifications</button>
+                    </div>
+                    <div class="cert-box">
+                        <div class="cert-icon"><i class="fas fa-certificate"></i></div>
+                        <div class="cert-box-title">EduSmart Certified</div>
+                        <div class="cert-box-sub">Professional Badge</div>
+                    </div>
+                </div>
+
+                <!-- Filter -->
+                <div class="filter-panel">
+                    <div class="filter-header">
+                        <div class="filter-title"><i class="fas fa-filter"></i> Filter Programs</div>
+                        <button class="clear-btn" id="clearSkillFilters">Clear All</button>
+                    </div>
+                    <div class="filter-grid">
+                        <div class="filter-group" style="grid-column:span 2;">
+                            <label class="filter-label">Search Programs</label>
+                            <input type="text" class="filter-input" id="skillSearch" placeholder="Search training programs...">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Domain</label>
+                            <select class="filter-select" id="domainFilter">
+                                <option value="">All Domains</option>
+                                <option>Technology</option><option>Data Science</option>
+                                <option>Design</option><option>Business</option><option>Cloud</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Duration</label>
+                            <select class="filter-select">
+                                <option>Any Duration</option>
+                                <option>1–4 weeks</option><option>1–3 months</option><option>3–6 months</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Format</label>
+                            <select class="filter-select">
+                                <option>All Formats</option>
+                                <option>Live Sessions</option><option>Self-Paced</option><option>Hybrid</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" style="align-self:flex-end;"><i class="fas fa-check"></i> Apply</button>
+                    </div>
+                </div>
+
+                <!-- Training Programs -->
+                <div class="section-header">
+                    <div class="section-title"><i class="fas fa-layer-group"></i> Training Programs</div>
+                    <a class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="programs-grid" id="programsGrid" style="margin-bottom:32px;"></div>
+
+                <!-- Practice Arenas -->
+                <div class="section-header">
+                    <div class="section-title"><i class="fas fa-code"></i> Practice Arenas</div>
+                    <a class="view-all-link">Explore All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="practice-grid" style="margin-bottom:32px;" id="practiceGrid"></div>
+
+                <!-- Skill Assessments -->
+                <div class="section-header">
+                    <div class="section-title"><i class="fas fa-chart-bar"></i> Skill Assessments</div>
+                    <a class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="assessment-grid" style="margin-bottom:32px;" id="assessGrid"></div>
+
+                <!-- Subscribe -->
+                <div class="sub-banner reveal">
+                    <div>
+                        <div class="sub-title">📬 Get New Programs in Your Inbox</div>
+                        <div class="sub-desc">Be the first to know about industry-relevant skill programs.</div>
+                    </div>
+                    <div class="sub-form">
+                        <input type="email" class="sub-input" placeholder="Enter your email...">
+                        <button class="btn-primary"><i class="fas fa-paper-plane"></i> Subscribe</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast">
+        <div class="toast-icon"><i class="fas fa-check"></i></div>
+        <div class="toast-msg" id="toastMsg">Done!</div>
+    </div>
+
+    <script>
+    const programs = [
+        { icon:'fa-laptop-code', cls:'pi-orange', title:'Full-Stack Web Development Bootcamp', provider:'EduSmart × Google',
+          desc:'Build complete web apps from scratch using modern frameworks like React, Node.js, and PostgreSQL.',
+          duration:'12 weeks', format:'Live + Recorded', students:'950', jobs:'85%', level:'int', topics:['React','Node.js','PostgreSQL','REST APIs'] },
+        { icon:'fa-chart-bar', cls:'pi-blue', title:'Data Science & Analytics Program', provider:'EduSmart × IBM',
+          desc:'Master data wrangling, statistical modelling, and machine learning pipelines with real datasets.',
+          duration:'16 weeks', format:'Self-Paced', students:'1.2k', jobs:'91%', level:'int', topics:['Python','Pandas','ML','Tableau'] },
+        { icon:'fa-paint-brush', cls:'pi-pink', title:'UX/UI Design Professional Track', provider:'EduSmart × Adobe',
+          desc:'Design user-centred digital products using Figma, Adobe XD, and design thinking methodologies.',
+          duration:'10 weeks', format:'Hybrid', students:'680', jobs:'79%', level:'beg', topics:['Figma','Prototyping','Research','Accessibility'] },
+        { icon:'fa-cloud', cls:'pi-purple', title:'Cloud Engineering Certification', provider:'EduSmart × AWS',
+          desc:'Prepare for AWS Solutions Architect exam with hands-on labs covering EC2, S3, Lambda, and more.',
+          duration:'8 weeks', format:'Live Sessions', students:'540', jobs:'94%', level:'adv', topics:['AWS','Terraform','Kubernetes','DevOps'] },
+        { icon:'fa-brain', cls:'pi-green', title:'AI & Machine Learning Intensive', provider:'EduSmart × NVIDIA',
+          desc:'Deep dive into neural networks, computer vision, NLP, and model deployment with GPU-accelerated labs.',
+          duration:'20 weeks', format:'Self-Paced', students:'820', jobs:'88%', level:'adv', topics:['PyTorch','TensorFlow','MLOps','CUDA'] },
+        { icon:'fa-bullhorn', cls:'pi-teal', title:'Digital Marketing Growth Program', provider:'EduSmart × HubSpot',
+          desc:'Grow businesses through SEO, paid media, email funnels, social strategy, and analytics dashboards.',
+          duration:'6 weeks', format:'Self-Paced', students:'1.5k', jobs:'72%', level:'beg', topics:['SEO','Google Ads','HubSpot','Analytics'] },
+    ];
+
+    const practices = [
+        { icon:'fa-code', cls:'prac-orange', title:'LeetCode-Style Challenges', desc:'200+ algorithmic problems with guided hints and solution explanations.', diff:'Medium', ddCls:'dd-med', tags:['Arrays','Trees','DP','Graphs'] },
+        { icon:'fa-database', cls:'prac-pink', title:'SQL Query Practice', desc:'Real-world database scenarios to sharpen your SQL and data querying skills.', diff:'Easy–Hard', ddCls:'dd-easy', tags:['SELECT','JOINs','Indexes','Window Fns'] },
+        { icon:'fa-flask', cls:'prac-blue', title:'Data Science Labs', desc:'Jupyter notebook environments with curated datasets and guided experiments.', diff:'Hard', ddCls:'dd-hard', tags:['Pandas','Scikit-learn','Seaborn'] },
+        { icon:'fa-drafting-compass', cls:'prac-purple', title:'Design Sprint Challenges', desc:'Timed design briefs to practice rapid wireframing and user journey mapping.', diff:'Easy', ddCls:'dd-easy', tags:['Figma','UX Research','Wireframing'] },
+    ];
+
+    const assessments = [
+        { title:'Python Developer', emoji:'🐍', color:'#6366f1', questions:40, time:'50 min', cat:'Technology' },
+        { title:'Business Analyst', emoji:'📊', color:'#f59e0b', questions:35, time:'45 min', cat:'Business' },
+        { title:'UI/UX Designer', emoji:'🎨', color:'#ec4899', questions:30, time:'40 min', cat:'Design' },
+        { title:'Data Scientist', emoji:'🧮', color:'#22c55e', questions:50, time:'60 min', cat:'Data Science' },
+        { title:'Cloud Engineer', emoji:'☁️', color:'#3b82f6', questions:45, time:'55 min', cat:'Cloud' },
+        { title:'Digital Marketer', emoji:'📢', color:'#14b8a6', questions:35, time:'40 min', cat:'Marketing' },
+    ];
+
+    const levelMap = { beg:'Beginner', int:'Intermediate', adv:'Advanced' };
+    const levelCls = { beg:'sb-beg', int:'sb-int', adv:'sb-adv' };
+
+    function renderPrograms() {
+        document.getElementById('programsGrid').innerHTML = programs.map(p => `
+            <div class="program-card reveal">
+                <div class="prog-header">
+                    <div class="prog-icon ${p.cls}"><i class="fas ${p.icon}"></i></div>
+                    <div>
+                        <div class="prog-title">${p.title}</div>
+                        <div class="prog-provider">${p.provider}</div>
+                    </div>
+                </div>
+                <div class="prog-body">
+                    <div class="prog-desc">${p.desc}</div>
+                    <div class="prog-meta-row">
+                        <div class="prog-meta"><i class="fas fa-clock"></i> <strong>${p.duration}</strong></div>
+                        <div class="prog-meta"><i class="fas fa-play-circle"></i> ${p.format}</div>
+                        <div class="prog-meta"><i class="fas fa-users"></i> <strong>${p.students} enrolled</strong></div>
+                        <div class="prog-meta"><i class="fas fa-briefcase"></i> <strong>${p.jobs} job rate</strong></div>
+                    </div>
+                    <div class="feat-tags">${p.topics.map(t=>`<span class="feat-tag">${t}</span>`).join('')}</div>
+                </div>
+                <div class="prog-footer">
+                    <span class="skill-badge ${levelCls[p.level]}">${levelMap[p.level]}</span>
+                    <div class="prog-btns">
+                        <button class="btn-sm-out">Preview</button>
+                        <button class="btn-sm-pri" onclick="enroll('${p.title}')">Enroll Free</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderPractice() {
+        document.getElementById('practiceGrid').innerHTML = practices.map(p => `
+            <div class="practice-card reveal">
+                <div class="prac-icon ${p.cls}"><i class="fas ${p.icon}"></i></div>
+                <div class="prac-title">${p.title}</div>
+                <div class="prac-desc">${p.desc}</div>
+                <div class="diff-row"><span class="diff-dot ${p.ddCls}"></span> Difficulty: ${p.diff}</div>
+                <div class="feat-tags">${p.tags.map(t=>`<span class="feat-tag">${t}</span>`).join('')}</div>
+                <button class="btn-primary" style="width:100%;justify-content:center;" onclick="enroll('${p.title}')"><i class="fas fa-play"></i> Start Practicing</button>
+            </div>
+        `).join('');
+    }
+
+    function renderAssessments() {
+        document.getElementById('assessGrid').innerHTML = assessments.map(a => `
+            <div class="assess-card reveal">
+                <div class="assess-level" style="color:${a.color}">${a.emoji} ${a.title}</div>
+                <div class="assess-meta">
+                    <div><div class="am-val">${a.questions}</div><div class="am-lbl">Questions</div></div>
+                    <div><div class="am-val">${a.time}</div><div class="am-lbl">Duration</div></div>
+                </div>
+                <div class="assess-cat">${a.cat}</div>
+                <button class="btn-primary" style="width:100%;justify-content:center;" onclick="enroll('${a.title} Assessment')"><i class="fas fa-play"></i> Take Test</button>
+            </div>
+        `).join('');
+    }
+
+    function enroll(name) {
+        document.getElementById('toastMsg').textContent = `"${name}" started!`;
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function triggerReveal() {
+        setTimeout(() => {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        }, 60);
+    }
+
+    renderPrograms(); renderPractice(); renderAssessments();
+    triggerReveal();
+
+    document.getElementById('skillSearch').addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.program-card').forEach((card, i) => {
+            const match = programs[i] && (programs[i].title.toLowerCase().includes(q) || programs[i].desc.toLowerCase().includes(q));
+            card.style.display = q && !match ? 'none' : '';
+        });
+    });
+    </script>
+    <!-- LiveChatAI Embed -->
+    <script src="https://app.livechatai.com/embed.js" data-id="cmfz1zexb0001la04iulo7jea" async defer></script>
+</body>
+</html>
